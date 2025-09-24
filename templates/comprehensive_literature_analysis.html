@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}综合文献分析{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>综合文献分析</h1>
+    <p>选择多篇已分析的文献，生成一份全面的研究领域综述报告。</p>
+</div>
+
+<div class="controls-card">
+    <h3>参数设置</h3>
+    <div class="control-group">
+        <label for="model-select">选择模型:</label>
+        <select id="model-select">
+            <option value="gemini-2.5-pro">gemini-2.5-pro (推荐)</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label for="temp-slider">Temperature (0-2): <span id="temp-value">1</span></label>
+        <input type="range" id="temp-slider" min="0" max="2" step="0.1" value="1">
+    </div>
+    <button id="start-comprehensive-analysis-btn" class="btn-primary">生成/更新综述报告</button>
+</div>
+
+<div class="content-card">
+    <h3>选择文献</h3>
+    <div class="selection-controls">
+        <button id="select-all-btn" class="btn-secondary">全选</button>
+        <button id="deselect-all-btn" class="btn-secondary">全不选</button>
+    </div>
+    <div id="analyzed-paper-list">
+        <p>正在加载已分析的文献列表...</p>
+    </div>
+</div>
+
+<div class="content-card" id="report-output-card">
+    <h3>综合分析报告 (Comprehensive_Report.md)</h3>
+    <div id="report-output" class="markdown-content">
+        <p>正在加载报告...</p>
+    </div>
+</div>
+{% endblock %}

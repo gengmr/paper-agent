@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}单篇文献分析{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>单篇文献分析</h1>
+    <p>自动处理 `papers` 目录下的所有PDF文件，提取原文并生成深度分析报告。</p>
+</div>
+
+<div class="controls-card">
+    <h3>参数设置</h3>
+    <div class="control-group">
+        <label for="model-select">选择模型:</label>
+        <select id="model-select">
+            <option value="gemini-2.5-pro">gemini-2.5-pro (质量高)</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash (速度快)</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label for="temp-markdown-slider">获取论文markdown原文 Temperature (0-2): <span id="temp-markdown-value">0</span></label>
+        <input type="range" id="temp-markdown-slider" min="0" max="2" step="0.1" value="0">
+    </div>
+    <div class="control-group">
+        <label for="temp-analysis-slider">获取分析报告 Temperature (0-2): <span id="temp-analysis-value">1</span></label>
+        <input type="range" id="temp-analysis-slider" min="0" max="2" step="0.1" value="1">
+    </div>
+    <button id="start-single-analysis-btn" class="btn-primary">开始分析</button>
+</div>
+
+<div class="content-card">
+    <h3>文件处理状态</h3>
+    <div id="progress-log" class="log-container"></div>
+    <div id="paper-list-container">
+        <p>正在加载文件列表...</p>
+    </div>
+</div>
+{% endblock %}

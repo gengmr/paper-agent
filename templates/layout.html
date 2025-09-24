@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}论文写作智能体{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-brain icon"></i>
+                <span class="sidebar-title">论文写作智能体</span>
+            </div>
+            <ul>
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-home icon"></i><span class="link-text">首页与设置</span></a></li>
+                <li><a href="{{ url_for('page', page_name='single_literature_analysis') }}"><i class="fas fa-file-alt icon"></i><span class="link-text">单篇文献分析</span></a></li>
+                <li><a href="{{ url_for('page', page_name='comprehensive_literature_analysis') }}"><i class="fas fa-book-reader icon"></i><span class="link-text">综合文献分析</span></a></li>
+                <li><a href="{{ url_for('page', page_name='brainstorming') }}"><i class="fas fa-lightbulb icon"></i><span class="link-text">头脑风暴</span></a></li>
+                <li><a href="{{ url_for('page', page_name='paper_outline') }}"><i class="fas fa-sitemap icon"></i><span class="link-text">论文框架搭建</span></a></li>
+                <li><a href="{{ url_for('page', page_name='paper_writing') }}"><i class="fas fa-pencil-alt icon"></i><span class="link-text">论文写作</span></a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

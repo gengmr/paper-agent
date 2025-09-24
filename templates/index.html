@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}欢迎 - 论文写作智能体{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>欢迎使用论文写作智能体</h1>
+    <p>一个基于 Google 大语言模型的全流程学术写作辅助工具</p>
+</div>
+
+<div class="content-card">
+    <h2>第一步：配置 API Key</h2>
+    <p>请将您的 Google API Key 粘贴到下方输入框中。密钥将安全地存储在您的浏览器本地，不会上传到任何服务器。</p>
+    <div class="api-key-form">
+        <input type="password" id="api-key-input" placeholder="在此粘贴您的 Google API Key">
+        <button id="save-api-key-btn" class="btn-primary">保存密钥</button>
+    </div>
+    <p id="api-key-status" class="status-message"></p>
+</div>
+
+<div class="content-card">
+    <h2>开始您的研究</h2>
+    <p>配置好密钥后，请从左侧菜单中选择一个功能开始。建议的流程如下：</p>
+    <ol>
+        <li><strong>单篇文献分析</strong>：将您的PDF文献放入 `papers` 文件夹，然后开始自动分析。</li>
+        <li><strong>综合文献分析</strong>：选择已分析的文献，生成一份全面的文献综述报告。</li>
+        <li><strong>头脑风暴</strong>：基于综述报告，激发创新的研究课题。</li>
+        <li><strong>论文框架搭建</strong>：为您的研究课题设计论文大纲。</li>
+        <li><strong>论文写作</strong>：开始撰写论文的各个章节。</li>
+    </ol>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block title %}头脑风暴{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>头脑风暴：发现创新研究课题</h1>
+    <p>基于综合分析报告和所有单篇分析的深度洞察，激发具有创新性的研究问题。</p>
+</div>
+
+<div class="controls-card">
+    <h3>参数设置</h3>
+    <div class="control-group">
+        <label for="model-select">选择模型:</label>
+        <select id="model-select">
+            <option value="gemini-2.5-pro">gemini-2.5-pro (推荐)</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label for="temp-slider">Temperature (0-2): <span id="temp-value">1</span></label>
+        <input type="range" id="temp-slider" min="0" max="2" step="0.1" value="1">
+    </div>
+    <button id="start-brainstorming-btn" class="btn-primary">开始头脑风暴</button>
+</div>
+
+<div class="content-card">
+    <h3>头脑风暴结果</h3>
+    <p>
+        分析依据: <strong>Comprehensive_Report.md</strong> 及所有单篇分析详情
+    </p>
+    <div id="brainstorming-output" class="markdown-content">
+        <p>点击上方按钮开始...</p>
+    </div>
+</div>
+{% endblock %}
