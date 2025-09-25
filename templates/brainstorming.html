@@ -23,12 +23,23 @@
 </div>
 
 <div class="content-card">
-    <h3>头脑风暴结果</h3>
-    <p>
-        分析依据: <strong>Comprehensive_Report.md</strong> 及所有单篇分析详情
+    <div class="card-header-controls">
+        <h3>头脑风暴结果</h3>
+        <div id="history-controls" class="history-controls" style="display: none;">
+            <button id="undo-btn" class="btn-secondary" title="回退 (Ctrl+Z)" disabled><i class="fas fa-undo"></i></button>
+            <button id="redo-btn" class="btn-secondary" title="前进 (Ctrl+Y)" disabled><i class="fas fa-redo"></i></button>
+        </div>
+    </div>
+
+    <p id="analysis-basis">
+        分析依据: 单篇文献分析结果及综合文献分析结果
     </p>
     <div id="brainstorming-output" class="markdown-content">
-        <p>点击上方按钮开始...</p>
+        <p>正在加载已有结果...</p>
     </div>
+</div>
+
+<div id="modification-bar" class="modification-bar" style="display: none;">
+    <textarea id="modification-prompt" placeholder="输入您的修改指令...（Enter 提交, Shift+Enter 换行）"></textarea>
 </div>
 {% endblock %}

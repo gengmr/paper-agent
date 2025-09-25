@@ -3,10 +3,48 @@
 {% block content %}
 <div class="page-header">
     <h1>论文写作</h1>
-    <p>此功能正在开发中，敬请期待。</p>
+    <p>在此页面中，您可以逐步完成论文的撰写。各部分之间存在依赖关系，请按顺序完成。</p>
 </div>
-<div class="content-card">
-    <h2>功能规划</h2>
-    <p>在这里，您将能够根据头脑风暴中选定的研究课题，自动生成一份结构完整、逻辑清晰的论文大纲。</p>
+
+<!-- 全局控制卡片 -->
+<div class="controls-card">
+    <h3>生成设置</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+        <div class="control-group">
+            <label for="paper-model-select">模型:</label>
+            <select id="paper-model-select">
+                <option value="gemini-2.5-pro">gemini-2.5-pro (推荐)</option>
+                <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="paper-language-select">语言:</label>
+            <select id="paper-language-select">
+                <option value="中文">中文</option>
+                <option value="English">English</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="paper-temp-slider">Temperature: <span id="paper-temp-value">1</span></label>
+            <input type="range" id="paper-temp-slider" min="0" max="2" step="0.1" value="1">
+        </div>
+    </div>
+</div>
+
+<!-- Idea 部分，独立于论文主体 -->
+<div id="idea-container">
+    <!-- Idea 卡片将由JavaScript动态生成 -->
+</div>
+
+<!-- 论文主体部分 -->
+<div id="paper-container" class="paper-document-view">
+    <!-- 各个论文部分将由JavaScript动态生成 -->
+    <p style="text-align: center; color: var(--text-muted);">正在加载写作工作区...</p>
+</div>
+
+<!-- 固定在底部的全局提示词输入栏 -->
+<div id="prompt-bar" class="modification-bar" style="display: none;">
+    <textarea id="global-prompt-input" placeholder="输入您的修改指令...（Enter 提交, Shift+Enter 换行）"></textarea>
+    <button id="submit-prompt-btn" class="btn btn-primary">发送修改</button>
 </div>
 {% endblock %}

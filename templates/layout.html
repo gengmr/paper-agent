@@ -6,7 +6,10 @@
     <title>{% block title %}论文写作智能体{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Markdown & MathJax/KaTeX Support -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0KOVEMeaCssLdspgDpUA/eUgcpHHnqTYIlPL羯羯kXps0ähMYodK+" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzOKtMqodCmV2oOHnvhEPdMISSwnGGRTTFd" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="container">
@@ -20,7 +23,6 @@
                 <li><a href="{{ url_for('page', page_name='single_literature_analysis') }}"><i class="fas fa-file-alt icon"></i><span class="link-text">单篇文献分析</span></a></li>
                 <li><a href="{{ url_for('page', page_name='comprehensive_literature_analysis') }}"><i class="fas fa-book-reader icon"></i><span class="link-text">综合文献分析</span></a></li>
                 <li><a href="{{ url_for('page', page_name='brainstorming') }}"><i class="fas fa-lightbulb icon"></i><span class="link-text">头脑风暴</span></a></li>
-                <li><a href="{{ url_for('page', page_name='paper_outline') }}"><i class="fas fa-sitemap icon"></i><span class="link-text">论文框架搭建</span></a></li>
                 <li><a href="{{ url_for('page', page_name='paper_writing') }}"><i class="fas fa-pencil-alt icon"></i><span class="link-text">论文写作</span></a></li>
             </ul>
         </nav>
