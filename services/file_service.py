@@ -7,25 +7,33 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 PAPERS_DIR = BASE_DIR / "papers"
 RESULT_DIR = BASE_DIR / "result"
+PROMPTS_DIR = BASE_DIR / "prompts"  # 新增
 MARKDOWNS_DIR = RESULT_DIR / "markdowns"
 ANALYSES_DIR = RESULT_DIR / "analyses"
 REPORTS_DIR = RESULT_DIR / "reports"
 BRAINSTORMS_DIR = RESULT_DIR / "brainstorms"
-# 新增: 论文写作内容目录
 PAPER_WRITING_DIR = RESULT_DIR / "paper_writing"
 
 # 确保所有目录都存在
 for dir_path in [
-    PAPERS_DIR, RESULT_DIR, MARKDOWNS_DIR, ANALYSES_DIR, REPORTS_DIR,
+    PAPERS_DIR, RESULT_DIR, PROMPTS_DIR, MARKDOWNS_DIR, ANALYSES_DIR, REPORTS_DIR,
     BRAINSTORMS_DIR, PAPER_WRITING_DIR
 ]:
     dir_path.mkdir(exist_ok=True)
 
-# 定义唯一的综合报告、头脑风暴和论文内容文件名
+# 定义文件路径
 COMPREHENSIVE_REPORT_PATH = REPORTS_DIR / "Comprehensive_Report.md"
 BRAINSTORMING_RESULTS_PATH = BRAINSTORMS_DIR / "Brainstorming_Results.md"
-# 新增: 论文内容JSON文件路径
 PAPER_CONTENT_PATH = PAPER_WRITING_DIR / "paper_content.json"
+PROMPTS_FILE_PATH = PROMPTS_DIR / "prompts.json"  # 新增
+
+
+def load_prompts():
+    """从JSON文件加载所有提示词"""
+    if not PROMPTS_FILE_PATH.exists():
+        raise FileNotFoundError(f"提示词文件未找到: {PROMPTS_FILE_PATH}")
+    with open(PROMPTS_FILE_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def get_paper_status_list():
@@ -53,7 +61,7 @@ def save_markdown_result(filename_stem: str, content: str):
 
 def save_analysis_result(filename_stem: str, content: str):
     """保存单篇分析结果"""
-    with open(ANALYSES_DIR / f"{file_name_stem}.md", "w", encoding="utf-8") as f:
+    with open(ANALYSES_DIR / f"{filename_stem}.md", "w", encoding="utf-8") as f:
         f.write(content)
 
 

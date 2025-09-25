@@ -438,16 +438,16 @@ function initPaperWritingPage() {
     let editingSection = null;
 
     const sections = {
-        idea: { name: 'Idea', dependencies: [] },
-        title: { name: '标题', dependencies: ['idea'] },
-        abstract: { name: '摘要', dependencies: ['idea', 'title'] },
-        keywords: { name: '关键词', dependencies: ['title', 'abstract'] },
-        introduction: { name: '1. 引言', dependencies: ['title', 'abstract'] },
-        background: { name: '2. 理论背景与假设建立', dependencies: ['title', 'abstract'] },
-        methods: { name: '3. 研究方法', dependencies: ['title', 'abstract', 'background'] },
-        results: { name: '4. 结果', dependencies: ['title', 'abstract', 'methods'] },
-        discussion: { name: '5. 讨论', dependencies: ['title', 'abstract', 'methods', 'results'] },
-        conclusion: { name: '6. 结论', dependencies: ['title', 'abstract', 'methods', 'results', 'discussion'] },
+        idea: { name: '核心想法', dependencies: [], number: null },
+        title: { name: '标题', dependencies: ['idea'], number: null },
+        abstract: { name: '摘要', dependencies: ['idea', 'title'], number: null },
+        keywords: { name: '关键词', dependencies: ['title', 'abstract'], number: null },
+        introduction: { name: '引言', dependencies: ['title', 'abstract'], number: '1.' },
+        background: { name: '理论背景与假设建立', dependencies: ['title', 'abstract'], number: '2.' },
+        methods: { name: '研究方法', dependencies: ['title', 'abstract', 'background'], number: '3.' },
+        results: { name: '结果', dependencies: ['title', 'abstract', 'methods'], number: '4.' },
+        discussion: { name: '讨论', dependencies: ['title', 'abstract', 'methods', 'results'], number: '5.' },
+        conclusion: { name: '结论', dependencies: ['title', 'abstract', 'methods', 'results', 'discussion'], number: '6.' },
     };
 
     function adjustTextareaHeight(el) {
@@ -458,27 +458,29 @@ function initPaperWritingPage() {
     function renderMarkdown(rawText, targetElement) {
         if (!rawText && targetElement.classList.contains('content-display')) {
             targetElement.innerHTML = `<span class="empty-placeholder">点击右侧按钮生成内容...</span>`;
+            targetElement.classList.add('is-placeholder');
             return;
         }
+        targetElement.classList.remove('is-placeholder');
 
         const renderedHtml = marked.parse(rawText);
         targetElement.innerHTML = renderedHtml;
 
-        // Render math
-        const mathElements = targetElement.querySelectorAll('.katex-math');
-        mathElements.forEach(el => {
-            const tex = el.textContent;
-            try {
-                katex.render(tex, el, {
-                    throwOnError: false,
-                    displayMode: el.tagName === 'DIV'
+        try {
+             if (window.renderMathInElement) {
+                renderMathInElement(targetElement, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
                 });
-            } catch (e) {
-                el.textContent = tex;
-                console.error("KaTeX Error: ", e);
             }
-        });
+        } catch (e) {
+            console.error("Render Math Error: ", e);
+        }
     }
+
 
     function renderPaperState() {
         Object.keys(sections).forEach(key => {
@@ -487,17 +489,38 @@ function initPaperWritingPage() {
 
             const sectionConfig = sections[key];
             const sectionData = paperState[key];
+
+            // 1. Determine locked status based on dependencies. This is the highest priority.
             const isLocked = !sectionConfig.dependencies.every(dep => paperState[dep]?.status === 'completed');
 
-            if (isLocked) {
-                sectionData.status = 'locked';
-            } else if (sectionData.status === 'locked') {
-                sectionData.status = sectionData.content.trim() === '' ? 'empty' : 'completed';
+            // 2. Update status ONLY IF NOT currently generating content.
+            if (sectionData.status !== 'generating') {
+                if (isLocked) {
+                    sectionData.status = 'locked';
+                } else {
+                    // Section is unlocked. Now determine if it's 'empty' or 'completed'.
+                    if (key === 'idea') {
+                        // The 'idea' section's status is only changed to 'completed' by its button.
+                        // If it's not locked and not completed, it must be 'empty'.
+                        if (sectionData.status !== 'completed') {
+                            sectionData.status = 'empty';
+                        }
+                    } else {
+                        // For all other sections, the status is derived from its content.
+                        if (sectionData.content.trim() === '') {
+                            sectionData.status = 'empty';
+                        } else {
+                            sectionData.status = 'completed';
+                        }
+                    }
+                }
             }
 
+
+            // 3. Render UI based on the final, authoritative status.
             sectionEl.dataset.status = sectionData.status;
 
-            const statusCircle = sectionEl.querySelector('.status-circle');
+            const statusIndicator = sectionEl.querySelector('.status-indicator');
             const depInfo = sectionEl.querySelector('.dependencies-info');
             const displayDiv = sectionEl.querySelector('.content-display');
             const textarea = sectionEl.querySelector('textarea');
@@ -505,9 +528,14 @@ function initPaperWritingPage() {
             const modifyBtn = sectionEl.querySelector('.btn-modify');
             const confirmIdeaBtn = sectionEl.querySelector('.btn-confirm-idea');
 
-            if(statusCircle) {
-                statusCircle.className = `status-circle ${sectionData.status}`;
-                statusCircle.innerHTML = { 'locked': '<i class="fas fa-lock"></i>', 'completed': '<i class="fas fa-check"></i>', 'empty': '', 'generating': '' }[sectionData.status] || '';
+            if(statusIndicator) {
+                statusIndicator.className = `status-indicator ${sectionData.status}`;
+                statusIndicator.innerHTML = {
+                    'locked': '<i class="fas fa-lock"></i>',
+                    'completed': '<i class="fas fa-check"></i>',
+                    'empty': '',
+                    'generating': ''
+                }[sectionData.status] || '';
             }
 
             if(depInfo) {
@@ -546,14 +574,16 @@ function initPaperWritingPage() {
             const sectionConfig = sections[key];
             const isIdea = key === 'idea';
 
-            let titleHTML = `<h3 class="paper-section-title">${sectionConfig.name}</h3>`;
+            const titleNumber = sectionConfig.number ? `<span class="section-number">${sectionConfig.number}</span>` : '';
+            const titleHTML = `<h3 class="paper-section-title">${titleNumber}${sectionConfig.name}</h3>`;
+
 
             const sectionHTML = `
                 <div class="paper-section" data-key="${key}" id="section-${key}">
                     <div class="section-header">
                         <div class="header-left">
-                           <div class="status-circle locked"><i class="fas fa-lock"></i></div>
-                           <div>
+                           <div class="status-indicator locked"><i class="fas fa-lock"></i></div>
+                           <div class="title-block">
                                ${titleHTML}
                                ${sectionConfig.dependencies.length > 0 ? '<div class="dependencies-info"></div>' : ''}
                            </div>
@@ -601,9 +631,9 @@ function initPaperWritingPage() {
                 globalPromptInput.placeholder = `为"${sections[sectionKey].name}"提供修改指令...`;
                 globalPromptInput.focus();
             } else if (button.classList.contains('btn-confirm-idea')) {
-                const textarea = document.getElementById(`textarea-idea`);
-                if (textarea.value.trim() === '') {
-                    alert('Idea内容不能为空！');
+                // BUG FIX: Check against the state object, not the DOM element's value.
+                if (paperState.idea.content.trim() === '') {
+                    alert('核心想法内容不能为空！');
                     return;
                 }
                 paperState.idea.status = 'completed';
@@ -626,16 +656,9 @@ function initPaperWritingPage() {
 
         const textarea = e.target.closest('textarea');
         if (textarea && textarea.dataset.section) {
-             const sectionKey = textarea.dataset.section;
+            const sectionKey = textarea.dataset.section;
             paperState[sectionKey].content = textarea.value;
             adjustTextareaHeight(textarea);
-            if (sectionKey !== 'idea' && paperState[sectionKey].status !== 'empty' && textarea.value.trim() === '') {
-                 paperState[sectionKey].status = 'empty';
-                 renderPaperState();
-            } else if(sectionKey !== 'idea' && paperState[sectionKey].status === 'empty' && textarea.value.trim() !== ''){
-                 paperState[sectionKey].status = 'completed';
-                 renderPaperState();
-            }
             scheduleSave();
         }
     }
@@ -645,14 +668,14 @@ function initPaperWritingPage() {
     document.body.addEventListener('focusout', (e) => {
         if (e.target.tagName === 'TEXTAREA' && e.target.dataset.section) {
             const sectionKey = e.target.dataset.section;
-            // Idea section has a dedicated confirm button
+            // The 'idea' section requires a button click to be marked 'completed'.
+            // For others, losing focus implies the edit is done.
             if (sectionKey !== 'idea') {
                 editingSection = null;
                 renderPaperState();
             }
         }
     });
-
 
     async function handlePromptSubmit(sectionKey, isModification, userPrompt = '') {
         const apiKey = getApiKey();
@@ -686,7 +709,6 @@ function initPaperWritingPage() {
             const result = await response.json();
             if (response.ok) {
                 paperState[targetSection].content = result.content;
-                paperState[targetSection].status = 'completed';
             } else {
                 alert(`生成失败: ${result.message}`);
                 paperState[targetSection].status = originalStatus;
