@@ -17,7 +17,8 @@ EXCLUDE_DIRS = {
     '.idea',
     'node_modules',
     'dist',
-    'build'
+    'build',
+    'result'
 }
 
 # Specific files to exclude from the export.

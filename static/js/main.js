@@ -717,6 +717,9 @@ function initPaperWritingPage() {
             alert(`网络错误: ${error}`);
             paperState[targetSection].status = originalStatus;
         } finally {
+            if (paperState[targetSection] && paperState[targetSection].status === 'generating') {
+                paperState[targetSection].status = 'completed';
+            }
             activeSectionForPrompt = null;
             renderPaperState();
             scheduleSave();

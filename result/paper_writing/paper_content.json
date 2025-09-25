@@ -1,7 +1,7 @@
 {
     "abstract": {
         "content": "",
-        "status": "locked"
+        "status": "empty"
     },
     "background": {
         "content": "",
@@ -36,7 +36,7 @@
         "status": "locked"
     },
     "title": {
-        "content": "",
-        "status": "empty"
+        "content": "数字化转型困境的破局：业务与技术主导模式、业务-IT协同及其对转型绩效的影响机制研究",
+        "status": "completed"
     }
 }
