@@ -252,7 +252,7 @@ def save_paper_content():
 
 @app.route('/api/paper/generate', methods=['POST'])
 def generate_paper_section():
-    """API: 为论文的特定部分生成或修改内容。"""
+    """API: 为论文的特定部分生成、修改、扩写或润色内容。"""
     data = request.json
 
     # 获取并校验参数
@@ -262,17 +262,18 @@ def generate_paper_section():
     language = data.get('language')
     target_section = data.get('target_section')
     paper_data = data.get('paper_data')
+    action_type = data.get('action_type')  # 'generate', 'modify', 'expand', 'polish'
 
     required_params = {
         'apiKey': api_key, 'model': model, 'temperature': temperature_str,
-        'language': language, 'target_section': target_section, 'paper_data': paper_data
+        'language': language, 'target_section': target_section, 'paper_data': paper_data,
+        'action_type': action_type
     }
     for param, value in required_params.items():
         if value is None:
             return jsonify({"status": "error", "message": f"请求体中必须提供 '{param}' 参数。"}), 400
 
-    user_prompt = data.get('user_prompt', '')
-    is_modification = bool(user_prompt)
+    user_prompt = data.get('user_prompt', '')  # 'modify' action needs this
 
     try:
         temperature = float(temperature_str)
@@ -307,20 +308,40 @@ def generate_paper_section():
             context_string = "\n\n".join(context_parts)
             prompt_parts.append(PROMPTS['paper_section_context_header'].format(context_string=context_string))
 
-        # 根据是“生成”还是“修改”来构建指令部分
+        # 根据 action_type 构建指令部分
         display_target_name = section_names.get(target_section, target_section.capitalize())
-        if is_modification:
-            prompt_parts.append(PROMPTS['paper_section_instruction_modify'].format(
+
+        action_to_prompt_map = {
+            'generate': 'paper_section_instruction_generate',
+            'modify': 'paper_section_instruction_modify',
+            'expand': 'paper_section_instruction_expand',
+            'polish': 'paper_section_instruction_polish'
+        }
+
+        prompt_template_key = action_to_prompt_map.get(action_type)
+        if not prompt_template_key:
+            return jsonify({"status": "error", "message": f"无效的 action_type: {action_type}"}), 400
+
+        prompt_template = PROMPTS[prompt_template_key]
+
+        # 根据不同的action格式化提示词
+        if action_type == 'generate':
+            instruction = prompt_template.format(language=language, target_name=display_target_name)
+        elif action_type == 'modify':
+            instruction = prompt_template.format(
                 target_name=display_target_name,
                 current_content=paper_data[target_section]['content'],
                 language=language,
                 user_prompt=user_prompt
-            ))
-        else:
-            prompt_parts.append(PROMPTS['paper_section_instruction_generate'].format(
-                language=language,
-                target_name=display_target_name
-            ))
+            )
+        else:  # 'expand' and 'polish'
+            instruction = prompt_template.format(
+                target_name=display_target_name,
+                current_content=paper_data[target_section]['content'],
+                language=language
+            )
+
+        prompt_parts.append(instruction)
 
         # 添加输出格式要求
         prompt_parts.append(PROMPTS['paper_section_output_format'])

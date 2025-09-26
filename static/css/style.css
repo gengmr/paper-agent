@@ -285,7 +285,7 @@ input[type="range"]::-moz-range-thumb {
 .status-message.success { color: var(--success-color); }
 .status-message.error { color: var(--error-color); }
 
-.btn, .btn-primary, .btn-secondary, .btn-success {
+.btn, .btn-primary, .btn-secondary, .btn-success, .btn-expand, .btn-polish {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: var(--border-radius-md);
@@ -482,7 +482,7 @@ h3.paper-section-title {
 .paper-section[data-status="locked"] .content-display:hover { background-color: transparent; }
 
 /* UNIFIED Placeholder Styling */
-.content-display.is-placeholder {
+.content-display.is-placeholder .empty-placeholder {
     font-style: italic;
     color: var(--text-muted);
 }
@@ -586,7 +586,14 @@ h3.paper-section-title {
 .dep-item.completed { color: #1e8449; background-color: #d4efdf; }
 .dep-item.pending { color: #616a73; background-color: #e9ecef; }
 
+.section-controls {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
 .section-controls .btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
+.btn-expand { background-color: #8e44ad; color: white; } /* Purple */
+.btn-polish { background-color: #16a085; color: white; } /* Teal */
 
 /* -- Idea Section Specifics -- */
 #idea-container .paper-section {
@@ -601,3 +608,152 @@ h3.paper-section-title {
 /* -- Global Prompt Bar for Paper Writing -- */
 #prompt-bar { padding: 1rem 2.5rem; }
 #prompt-bar textarea { height: 50px; border-radius: var(--border-radius-md); }
+
+/* -- Diff Modal Styles (Side-by-Side View) -- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: var(--border-radius-lg);
+    width: 90%;
+    max-width: 1400px; /* Wider for side-by-side view */
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.visible .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.modal-header h2 {
+    border: none;
+    margin: 0;
+    padding: 0;
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    line-height: 1;
+}
+
+.modal-body {
+    overflow: hidden; /* Hide main scrollbar */
+    flex-grow: 1;
+    display: flex;
+    gap: 1rem; /* Space between panes */
+}
+
+.diff-pane {
+    flex: 1;
+    overflow-y: auto; /* Each pane scrolls independently */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    background-color: var(--card-bg);
+    position: relative;
+}
+
+.pane-header {
+    position: sticky;
+    top: 0;
+    background: var(--hover-bg-color);
+    padding: 0.75rem 1rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color);
+    z-index: 10;
+}
+
+#diff-output {
+    display: flex;
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+#diff-output-old, #diff-output-new {
+    flex: 1 1 50%;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.diff-line {
+    display: flex;
+    width: 100%;
+    min-height: 24px; /* Ensure empty lines are aligned */
+    padding: 2px 0;
+}
+.diff-line.context { background-color: transparent; }
+.diff-line.added { background-color: rgba(46, 160, 67, 0.15); }
+.diff-line.removed { background-color: rgba(248, 81, 73, 0.1); }
+.diff-line.empty { background-color: #f7f9fc; }
+
+.line-number {
+    flex-shrink: 0;
+    user-select: none;
+    width: 45px;
+    padding-right: 10px;
+    text-align: right;
+    color: var(--text-muted);
+    background-color: var(--hover-bg-color);
+    border-right: 1px solid var(--border-color);
+}
+
+.line-content {
+    padding-left: 15px;
+    flex-grow: 1;
+}
+
+.diff-line ins, .diff-line del {
+    text-decoration: none;
+    border-radius: 3px;
+}
+.diff-line.added ins { background-color: rgba(46, 160, 67, 0.3); }
+.diff-line.removed del { background-color: rgba(248, 81, 73, 0.2); }
+
+
+.modal-footer {
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}

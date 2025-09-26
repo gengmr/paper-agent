@@ -420,8 +420,122 @@ function initBrainstormingPage() {
     loadInitialResult();
 }
 
+// --- 论文写作页 ---
 
-// --- 论文写作页 (已根据新要求重构) ---
+// 全局差异对比模态框逻辑
+const diffModal = document.getElementById('diff-modal');
+if (diffModal) {
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const rejectChangesBtn = document.getElementById('reject-changes-btn');
+    const acceptChangesBtn = document.getElementById('accept-changes-btn');
+    let onAcceptCallback = null;
+    let onRejectCallback = null;
+
+    function showDiffModal(originalText, newText, onAccept, onReject) {
+        const oldPane = document.getElementById('diff-output-old');
+        const newPane = document.getElementById('diff-output-new');
+        oldPane.innerHTML = '';
+        newPane.innerHTML = '';
+
+        const lineDiff = Diff.diffLines(originalText, newText);
+        let oldLineNum = 1;
+        let newLineNum = 1;
+
+        const escapeHtml = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        const createLine = (type, lineNumber, content) => {
+            const line = document.createElement('div');
+            line.className = `diff-line ${type}`;
+            line.innerHTML = `<span class="line-number">${lineNumber || ''}</span><span class="line-content">${content}</span>`;
+            return line;
+        };
+
+        for (let i = 0; i < lineDiff.length; i++) {
+            const part = lineDiff[i];
+            const lines = part.value.replace(/\n$/, '').split('\n');
+
+            if (part.added) {
+                lines.forEach(line => {
+                    oldPane.appendChild(createLine('empty', null, ''));
+                    newPane.appendChild(createLine('added', newLineNum++, escapeHtml(line)));
+                });
+            } else if (part.removed) {
+                // Lookahead to see if this is a modification
+                const nextPart = lineDiff[i + 1];
+                if (nextPart && nextPart.added) {
+                    const wordDiff = Diff.diffWords(part.value, nextPart.value);
+                    let oldContent = '';
+                    let newContent = '';
+                    wordDiff.forEach(word => {
+                        const escapedWord = escapeHtml(word.value);
+                        if (word.added) {
+                            newContent += `<ins>${escapedWord}</ins>`;
+                        } else if (word.removed) {
+                            oldContent += `<del>${escapedWord}</del>`;
+                        } else {
+                            oldContent += escapedWord;
+                            newContent += escapedWord;
+                        }
+                    });
+                    oldPane.appendChild(createLine('removed', oldLineNum++, oldContent));
+                    newPane.appendChild(createLine('added', newLineNum++, newContent));
+                    i++; // Skip next part
+                } else {
+                    lines.forEach(line => {
+                        oldPane.appendChild(createLine('removed', oldLineNum++, escapeHtml(line)));
+                        newPane.appendChild(createLine('empty', null, ''));
+                    });
+                }
+            } else { // context
+                lines.forEach(line => {
+                    oldPane.appendChild(createLine('context', oldLineNum++, escapeHtml(line)));
+                    newPane.appendChild(createLine('context', newLineNum++, escapeHtml(line)));
+                });
+            }
+        }
+
+        onAcceptCallback = onAccept;
+        onRejectCallback = onReject;
+        diffModal.classList.add('visible');
+
+        // Sync scrolling
+        const oldPaneScroll = oldPane.parentElement;
+        const newPaneScroll = newPane.parentElement;
+        let isSyncing = false;
+
+        const onScroll = (e) => {
+            if (isSyncing) return;
+            isSyncing = true;
+            const other = e.target === oldPaneScroll ? newPaneScroll : oldPaneScroll;
+            other.scrollTop = e.target.scrollTop;
+            setTimeout(() => { isSyncing = false; }, 50); // Debounce to prevent scroll fight
+        };
+
+        oldPaneScroll.onscroll = onScroll;
+        newPaneScroll.onscroll = onScroll;
+    }
+
+    function hideDiffModal() {
+        if (onRejectCallback) onRejectCallback();
+        diffModal.classList.remove('visible');
+        onAcceptCallback = null;
+        onRejectCallback = null;
+    }
+
+    acceptChangesBtn.addEventListener('click', () => {
+        if (onAcceptCallback) onAcceptCallback();
+        onRejectCallback = null;
+        hideDiffModal();
+    });
+
+    rejectChangesBtn.addEventListener('click', hideDiffModal);
+    closeModalBtn.addEventListener('click', hideDiffModal);
+    diffModal.addEventListener('click', (e) => {
+        if (e.target === diffModal) hideDiffModal();
+    });
+}
+
+
 function initPaperWritingPage() {
     const ideaContainer = document.getElementById('idea-container');
     const paperContainer = document.getElementById('paper-container');
@@ -433,7 +547,6 @@ function initPaperWritingPage() {
     const tempSlider = document.getElementById('paper-temp-slider');
 
     let paperState = {};
-    let activeSectionForPrompt = null;
     let saveTimeout;
     let editingSection = null;
 
@@ -462,25 +575,8 @@ function initPaperWritingPage() {
             return;
         }
         targetElement.classList.remove('is-placeholder');
-
-        const renderedHtml = marked.parse(rawText);
-        targetElement.innerHTML = renderedHtml;
-
-        try {
-             if (window.renderMathInElement) {
-                renderMathInElement(targetElement, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '$', right: '$', display: false}
-                    ],
-                    throwOnError: false
-                });
-            }
-        } catch (e) {
-            console.error("Render Math Error: ", e);
-        }
+        targetElement.innerHTML = marked.parse(rawText);
     }
-
 
     function renderPaperState() {
         Object.keys(sections).forEach(key => {
@@ -490,54 +586,29 @@ function initPaperWritingPage() {
             const sectionConfig = sections[key];
             const sectionData = paperState[key];
 
-            // 1. Determine locked status based on dependencies. This is the highest priority.
             const isLocked = !sectionConfig.dependencies.every(dep => paperState[dep]?.status === 'completed');
 
-            // 2. Update status ONLY IF NOT currently generating content.
             if (sectionData.status !== 'generating') {
                 if (isLocked) {
                     sectionData.status = 'locked';
-                } else {
-                    // Section is unlocked. Now determine if it's 'empty' or 'completed'.
-                    if (key === 'idea') {
-                        // The 'idea' section's status is only changed to 'completed' by its button.
-                        // If it's not locked and not completed, it must be 'empty'.
-                        if (sectionData.status !== 'completed') {
-                            sectionData.status = 'empty';
-                        }
-                    } else {
-                        // For all other sections, the status is derived from its content.
-                        if (sectionData.content.trim() === '') {
-                            sectionData.status = 'empty';
-                        } else {
-                            sectionData.status = 'completed';
-                        }
-                    }
+                } else if (key === 'idea' && sectionData.status !== 'completed') {
+                    sectionData.status = 'empty';
+                } else if (key !== 'idea') {
+                    sectionData.status = sectionData.content.trim() === '' ? 'empty' : 'completed';
                 }
             }
 
-
-            // 3. Render UI based on the final, authoritative status.
             sectionEl.dataset.status = sectionData.status;
 
             const statusIndicator = sectionEl.querySelector('.status-indicator');
-            const depInfo = sectionEl.querySelector('.dependencies-info');
-            const displayDiv = sectionEl.querySelector('.content-display');
-            const textarea = sectionEl.querySelector('textarea');
-            const generateBtn = sectionEl.querySelector('.btn-generate');
-            const modifyBtn = sectionEl.querySelector('.btn-modify');
-            const confirmIdeaBtn = sectionEl.querySelector('.btn-confirm-idea');
-
             if(statusIndicator) {
                 statusIndicator.className = `status-indicator ${sectionData.status}`;
                 statusIndicator.innerHTML = {
-                    'locked': '<i class="fas fa-lock"></i>',
-                    'completed': '<i class="fas fa-check"></i>',
-                    'empty': '',
-                    'generating': ''
+                    'locked': '<i class="fas fa-lock"></i>', 'completed': '<i class="fas fa-check"></i>', 'empty': '', 'generating': ''
                 }[sectionData.status] || '';
             }
 
+            const depInfo = sectionEl.querySelector('.dependencies-info');
             if(depInfo) {
                 depInfo.innerHTML = sectionConfig.dependencies.map(dep => {
                     const isCompleted = paperState[dep]?.status === 'completed';
@@ -547,10 +618,13 @@ function initPaperWritingPage() {
             }
 
             const isEditingThisSection = editingSection === key;
+            const displayDiv = sectionEl.querySelector('.content-display');
             if (displayDiv) {
                 displayDiv.style.display = isEditingThisSection ? 'none' : 'block';
                 renderMarkdown(sectionData.content, displayDiv);
             }
+
+            const textarea = sectionEl.querySelector('textarea');
             if(textarea) {
                 textarea.style.display = isEditingThisSection ? 'block' : 'none';
                 if(isEditingThisSection) {
@@ -560,9 +634,18 @@ function initPaperWritingPage() {
                 }
             }
 
-            if(generateBtn) generateBtn.style.display = (sectionData.status === 'empty' && !isEditingThisSection) ? 'inline-block' : 'none';
-            if(modifyBtn) modifyBtn.style.display = (sectionData.status === 'completed' && !isEditingThisSection) ? 'inline-block' : 'none';
-            if(confirmIdeaBtn) confirmIdeaBtn.style.display = (key === 'idea' && sectionData.status !== 'completed' && !isEditingThisSection) ? 'inline-block' : 'none';
+            const generateBtn = sectionEl.querySelector('.btn-generate');
+            const modifyBtn = sectionEl.querySelector('.btn-modify');
+            const expandBtn = sectionEl.querySelector('.btn-expand');
+            const polishBtn = sectionEl.querySelector('.btn-polish');
+            const confirmIdeaBtn = sectionEl.querySelector('.btn-confirm-idea');
+
+            const showActionButtons = sectionData.status === 'completed' && !isEditingThisSection;
+            if (generateBtn) generateBtn.style.display = (sectionData.status === 'empty' && !isEditingThisSection) ? 'inline-block' : 'none';
+            if (modifyBtn) modifyBtn.style.display = showActionButtons ? 'inline-block' : 'none';
+            if (expandBtn) expandBtn.style.display = showActionButtons ? 'inline-block' : 'none';
+            if (polishBtn) polishBtn.style.display = showActionButtons ? 'inline-block' : 'none';
+            if (confirmIdeaBtn) confirmIdeaBtn.style.display = (key === 'idea' && sectionData.status !== 'completed' && !isEditingThisSection) ? 'inline-block' : 'none';
         });
     }
 
@@ -573,11 +656,8 @@ function initPaperWritingPage() {
         for (const key in sections) {
             const sectionConfig = sections[key];
             const isIdea = key === 'idea';
-
             const titleNumber = sectionConfig.number ? `<span class="section-number">${sectionConfig.number}</span>` : '';
             const titleHTML = `<h3 class="paper-section-title">${titleNumber}${sectionConfig.name}</h3>`;
-
-
             const sectionHTML = `
                 <div class="paper-section" data-key="${key}" id="section-${key}">
                     <div class="section-header">
@@ -591,6 +671,8 @@ function initPaperWritingPage() {
                         <div class="header-right section-controls">
                            ${!isIdea ? `<button class="btn btn-primary btn-generate" data-section="${key}">生成</button>` : ''}
                            ${!isIdea ? `<button class="btn btn-secondary btn-modify" data-section="${key}">修改</button>` : ''}
+                           ${!isIdea ? `<button class="btn btn-expand" data-section="${key}">扩写</button>` : ''}
+                           ${!isIdea ? `<button class="btn btn-polish" data-section="${key}">润色</button>` : ''}
                            ${isIdea ? `<button class="btn btn-success btn-confirm-idea" data-section="${key}">确认想法</button>` : ''}
                         </div>
                     </div>
@@ -598,11 +680,8 @@ function initPaperWritingPage() {
                     <textarea id="textarea-${key}" data-section="${key}" style="display: none;"></textarea>
                 </div>`;
 
-            if (isIdea) {
-                ideaContainer.insertAdjacentHTML('beforeend', sectionHTML);
-            } else {
-                paperContainer.insertAdjacentHTML('beforeend', sectionHTML);
-            }
+            if (isIdea) ideaContainer.insertAdjacentHTML('beforeend', sectionHTML);
+            else paperContainer.insertAdjacentHTML('beforeend', sectionHTML);
         }
     }
 
@@ -620,22 +699,20 @@ function initPaperWritingPage() {
     }
 
     function handleInteraction(e) {
-        const button = e.target.closest('button');
-        if (button && button.dataset.section) {
+        const target = e.target;
+        const button = target.closest('button[data-section]');
+        if (button) {
             const sectionKey = button.dataset.section;
-            if (button.classList.contains('btn-generate')) {
-                handlePromptSubmit(sectionKey, false);
-            } else if (button.classList.contains('btn-modify')) {
-                activeSectionForPrompt = sectionKey;
+            if (button.matches('.btn-generate')) performSectionAction(sectionKey, 'generate');
+            else if (button.matches('.btn-expand')) performSectionAction(sectionKey, 'expand');
+            else if (button.matches('.btn-polish')) performSectionAction(sectionKey, 'polish');
+            else if (button.matches('.btn-modify')) {
                 promptBar.style.display = 'flex';
                 globalPromptInput.placeholder = `为"${sections[sectionKey].name}"提供修改指令...`;
                 globalPromptInput.focus();
-            } else if (button.classList.contains('btn-confirm-idea')) {
-                // BUG FIX: Check against the state object, not the DOM element's value.
-                if (paperState.idea.content.trim() === '') {
-                    alert('核心想法内容不能为空！');
-                    return;
-                }
+                submitPromptBtn.dataset.section = sectionKey;
+            } else if (button.matches('.btn-confirm-idea')) {
+                if (paperState.idea.content.trim() === '') return alert('核心想法内容不能为空！');
                 paperState.idea.status = 'completed';
                 editingSection = null;
                 renderPaperState();
@@ -644,8 +721,8 @@ function initPaperWritingPage() {
             return;
         }
 
-        const displayDiv = e.target.closest('.content-display');
-        if (displayDiv && displayDiv.dataset.section) {
+        const displayDiv = target.closest('.content-display[data-section]');
+        if (displayDiv) {
             const sectionKey = displayDiv.dataset.section;
             if (paperState[sectionKey].status !== 'locked') {
                 editingSection = sectionKey;
@@ -654,11 +731,10 @@ function initPaperWritingPage() {
             return;
         }
 
-        const textarea = e.target.closest('textarea');
-        if (textarea && textarea.dataset.section) {
-            const sectionKey = textarea.dataset.section;
-            paperState[sectionKey].content = textarea.value;
-            adjustTextareaHeight(textarea);
+        if (target.matches('textarea[data-section]')) {
+            const sectionKey = target.dataset.section;
+            paperState[sectionKey].content = target.value;
+            adjustTextareaHeight(target);
             scheduleSave();
         }
     }
@@ -666,70 +742,69 @@ function initPaperWritingPage() {
     document.body.addEventListener('click', handleInteraction);
     document.body.addEventListener('input', handleInteraction);
     document.body.addEventListener('focusout', (e) => {
-        if (e.target.tagName === 'TEXTAREA' && e.target.dataset.section) {
-            const sectionKey = e.target.dataset.section;
-            // The 'idea' section requires a button click to be marked 'completed'.
-            // For others, losing focus implies the edit is done.
-            if (sectionKey !== 'idea') {
-                editingSection = null;
-                renderPaperState();
-            }
+        if (e.target.matches('textarea[data-section]') && e.target.dataset.section !== 'idea') {
+            editingSection = null;
+            renderPaperState();
         }
     });
 
-    async function handlePromptSubmit(sectionKey, isModification, userPrompt = '') {
+    async function performSectionAction(sectionKey, actionType, userPrompt = '') {
         const apiKey = getApiKey();
         if (!apiKey) return;
-        const targetSection = sectionKey || activeSectionForPrompt;
-        if (!targetSection) return;
 
-        const originalStatus = paperState[targetSection].status;
-        paperState[targetSection].status = 'generating';
-        editingSection = null; // Exit editing mode
+        const originalStatus = paperState[sectionKey].status;
+        const originalContent = paperState[sectionKey].content;
+        paperState[sectionKey].status = 'generating';
+        editingSection = null;
         renderPaperState();
-        if(isModification) {
-            promptBar.style.display = 'none';
-            globalPromptInput.value = '';
-        }
+
+        promptBar.style.display = 'none';
+        globalPromptInput.value = '';
 
         try {
             const response = await fetch('/api/paper/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    apiKey,
-                    model: modelSelect.value,
-                    temperature: parseFloat(tempSlider.value),
-                    language: languageSelect.value,
-                    target_section: targetSection,
-                    paper_data: paperState,
-                    user_prompt: userPrompt,
+                    apiKey, model: modelSelect.value, temperature: parseFloat(tempSlider.value),
+                    language: languageSelect.value, target_section: sectionKey,
+                    paper_data: paperState, action_type: actionType, user_prompt: userPrompt,
                 }),
             });
             const result = await response.json();
+
             if (response.ok) {
-                paperState[targetSection].content = result.content;
+                // Call the globally defined showDiffModal function
+                showDiffModal(
+                    originalContent, result.content,
+                    () => { // onAccept
+                        paperState[sectionKey].content = result.content;
+                        paperState[sectionKey].status = 'completed';
+                        renderPaperState();
+                        scheduleSave();
+                    },
+                    () => { // onReject
+                        paperState[sectionKey].status = originalStatus;
+                        renderPaperState();
+                    }
+                );
             } else {
-                alert(`生成失败: ${result.message}`);
-                paperState[targetSection].status = originalStatus;
+                alert(`操作失败: ${result.message}`);
+                paperState[sectionKey].status = originalStatus;
+                renderPaperState();
             }
         } catch (error) {
             alert(`网络错误: ${error}`);
-            paperState[targetSection].status = originalStatus;
-        } finally {
-            if (paperState[targetSection] && paperState[targetSection].status === 'generating') {
-                paperState[targetSection].status = 'completed';
-            }
-            activeSectionForPrompt = null;
+            paperState[sectionKey].status = originalStatus;
             renderPaperState();
-            scheduleSave();
         }
     }
 
     submitPromptBtn.addEventListener('click', () => {
         const userPrompt = globalPromptInput.value.trim();
-        if (userPrompt && activeSectionForPrompt) {
-            handlePromptSubmit(null, true, userPrompt);
+        const sectionKey = submitPromptBtn.dataset.section;
+        if (userPrompt && sectionKey) {
+            performSectionAction(sectionKey, 'modify', userPrompt);
         }
     });
     globalPromptInput.addEventListener('keydown', (e) => {
