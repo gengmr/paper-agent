@@ -13,8 +13,9 @@
         <div class="control-group">
             <label for="paper-model-select">模型:</label>
             <select id="paper-model-select">
-                <option value="gemini-2.5-pro">gemini-2.5-pro (推荐)</option>
-                <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                {% for model in models %}
+                <option value="{{ model }}">{{ model }}{% if loop.first %} (推荐){% endif %}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="control-group">

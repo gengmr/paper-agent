@@ -24,6 +24,11 @@ def analyze_pdf_content(file_path: pathlib.Path, prompt: str, model_name: str, t
     """
     client = get_client(api_key)  # 动态获取客户端
 
+    # 用于调用谷歌搜索
+    grounding_tool = types.Tool(
+        google_search=types.GoogleSearch()
+    )
+
     if not file_path.exists():
         raise FileNotFoundError(f"文件未找到: {file_path}")
 
@@ -39,6 +44,7 @@ def analyze_pdf_content(file_path: pathlib.Path, prompt: str, model_name: str, t
             model=model_name,
             contents=[uploaded_file, prompt],
             config=types.GenerateContentConfig(
+                tools=[grounding_tool],
                 temperature=temperature
             )
         )
@@ -55,11 +61,17 @@ def generate_text_from_prompt(content_list: list, model_name: str, temperature: 
     """
     client = get_client(api_key)  # 动态获取客户端
 
+    # 用于调用谷歌搜索
+    grounding_tool = types.Tool(
+        google_search=types.GoogleSearch()
+    )
+
     print(f"使用模型 '{model_name}' (temperature={temperature}) 生成文本...")
     response = client.models.generate_content(
         model=model_name,
         contents=content_list,
         config=types.GenerateContentConfig(
+            tools=[grounding_tool],
             temperature=temperature
         )
     )

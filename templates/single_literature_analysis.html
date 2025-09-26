@@ -11,8 +11,14 @@
     <div class="control-group">
         <label for="model-select">选择模型:</label>
         <select id="model-select">
-            <option value="gemini-2.5-pro">gemini-2.5-pro (质量高)</option>
-            <option value="gemini-2.5-flash">gemini-2.5-flash (速度快)</option>
+            {% for model in models %}
+            <option value="{{ model }}">
+                {{ model }}
+                {% if 'pro' in model %} (质量高)
+                {% elif 'flash' in model %} (速度快)
+                {% endif %}
+            </option>
+            {% endfor %}
         </select>
     </div>
     <div class="control-group">
