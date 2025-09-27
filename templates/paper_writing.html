@@ -3,19 +3,41 @@
 {% block content %}
 <div class="page-header">
     <h1>论文写作</h1>
-    <p>在此页面中，您可以逐步完成论文的撰写。各部分之间存在依赖关系，请按顺序完成。</p>
+    <p>在此页面中，您可以创建、管理并逐步完成多篇论文的撰写。</p>
 </div>
 
-<!-- 全局控制卡片 -->
-<div class="controls-card">
-    <h3>生成设置</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+<!-- 文章管理中心 (Redesigned) -->
+<div class="controls-card" id="paper-management-card">
+    <!-- Left Column: Document Management & Tools -->
+    <div class="card-section">
+        <h3 class="section-title"><i class="fas fa-folder-open"></i> 文章管理与工具</h3>
         <div class="control-group">
+            <label for="paper-select">当前文章:</label>
+            <div class="input-with-button">
+                <select id="paper-select"><!-- Options populated by JS --></select>
+                <button id="new-paper-btn" class="btn btn-primary" title="新建文章"><i class="fas fa-plus"></i></button>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="rename-input">重命名:</label>
+            <div class="input-with-button">
+                <input type="text" id="rename-input" placeholder="输入新名称...">
+                <button id="rename-paper-btn" class="btn btn-secondary" title="确认重命名"><i class="fas fa-check"></i></button>
+                <button id="delete-paper-btn" class="btn btn-danger" title="删除当前文章"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+        <div class="control-group">
+             <button id="export-pdf-btn" class="btn btn-success full-width"><i class="fas fa-file-pdf"></i> 导出为 PDF</button>
+        </div>
+    </div>
+
+    <!-- Right Column: AI Settings -->
+    <div class="card-section">
+        <h3 class="section-title"><i class="fas fa-cogs"></i> AI 全局设置</h3>
+         <div class="control-group">
             <label for="paper-model-select">模型:</label>
             <select id="paper-model-select">
-                {% for model in models %}
-                <option value="{{ model }}">{{ model }}{% if loop.first %} (推荐){% endif %}</option>
-                {% endfor %}
+                {% for model in models %}<option value="{{ model }}">{{ model }}{% if loop.first %} (推荐){% endif %}</option>{% endfor %}
             </select>
         </div>
         <div class="control-group">
@@ -26,11 +48,12 @@
             </select>
         </div>
         <div class="control-group">
-            <label for="paper-temp-slider">Temperature: <span id="paper-temp-value">1</span></label>
+            <label for="paper-temp-slider">Temperature (创意度): <span id="paper-temp-value">1</span></label>
             <input type="range" id="paper-temp-slider" min="0" max="2" step="0.1" value="1">
         </div>
     </div>
 </div>
+
 
 <!-- Idea 部分，独立于论文主体 -->
 <div id="idea-container">

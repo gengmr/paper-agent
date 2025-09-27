@@ -14,6 +14,7 @@
     --shadow-color: rgba(58, 80, 107, 0.1);
     --success-color: #1e8449;
     --error-color: #c0392b;
+    --danger-color: #d9534f;
     --warning-color: #f39c12;
     --processing-color: var(--accent-color);
     --locked-color: #909da9;
@@ -285,7 +286,7 @@ input[type="range"]::-moz-range-thumb {
 .status-message.success { color: var(--success-color); }
 .status-message.error { color: var(--error-color); }
 
-.btn, .btn-primary, .btn-secondary, .btn-success, .btn-expand, .btn-polish {
+.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-expand, .btn-polish {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: var(--border-radius-md);
@@ -295,6 +296,10 @@ input[type="range"]::-moz-range-thumb {
     transition: all 0.2s ease;
     flex-shrink: 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 .btn:disabled {
     cursor: not-allowed;
@@ -310,8 +315,9 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .btn-primary { background-color: var(--accent-color); color: white; }
-.btn-secondary { background-color: #6c757d; color: #fff; margin-right: 0.5rem; }
+.btn-secondary { background-color: #6c757d; color: #fff; }
 .btn-success { background-color: var(--success-color); color: #fff; }
+.btn-danger { background-color: var(--danger-color); color: #fff; }
 
 /* -- Lists, Logs & Generic Status Indicators -- */
 #paper-list-container ul, #analyzed-paper-list ul {
@@ -423,6 +429,76 @@ body:has(.sidebar:hover) .modification-bar {
 }
 
 /* --- Paper Writing Page Specific Styles --- */
+
+/* -- Redesigned Management Card -- */
+#paper-management-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+    padding: 2.5rem;
+}
+
+@media (max-width: 992px) {
+    #paper-management-card {
+        grid-template-columns: 1fr;
+    }
+}
+
+#paper-management-card .card-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: 100%;
+}
+
+#paper-management-card .section-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin: 0 0 0.5rem 0;
+    padding: 0 0 0.75rem 0;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+#paper-management-card h3 { border: none; } /* Override generic h3 style */
+
+
+#paper-management-card .control-group {
+    margin: 0;
+}
+/* Push the last control group to the bottom of the flex container */
+#paper-management-card .card-section .control-group:last-child {
+    margin-top: auto;
+    padding-top: 1.5rem;
+}
+
+
+.input-with-button {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.input-with-button > * {
+    flex-grow: 1;
+}
+
+.input-with-button .btn {
+    flex-grow: 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+#rename-paper-btn, #delete-paper-btn {
+    min-width: 44px;
+    flex-grow: 0;
+}
+
+
 .paper-document-view {
     padding: 3rem 4rem;
     box-shadow: 0 8px 32px var(--shadow-color);
@@ -756,4 +832,37 @@ h3.paper-section-title {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
+}
+
+/* Print-specific styles for PDF export */
+@media print {
+    body, .container {
+        display: block;
+        background-color: #fff;
+    }
+    .sidebar, .page-header, .controls-card, .section-controls, #prompt-bar, .modal-overlay {
+        display: none !important;
+    }
+    .main-content {
+        padding: 0;
+        overflow: visible;
+    }
+    .paper-document-view {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+    }
+    .paper-section {
+        page-break-inside: avoid;
+    }
+    h3.paper-section-title {
+        page-break-after: avoid;
+        page-break-before: auto;
+    }
+    .paper-section .content-display, .paper-section textarea {
+        color: #000;
+    }
+    @page {
+        margin: 2cm;
+    }
 }

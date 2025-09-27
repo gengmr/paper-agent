@@ -6,10 +6,31 @@
     <title>{% block title %}论文写作智能体{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Markdown & MathJax/KaTeX Support -->
+
+    <!-- Markdown Library -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0KOVEMeaCssLdspgDpUA/eUgcpHHnqTYIlPL羯羯kXps0ähMYodK+" crossorigin="anonymous">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzOKtMqodCmV2oOHnvhEPdMISSwnGGRTTFd" crossorigin="anonymous"></script>
+
+    <!-- MathJax for professional mathematical formula rendering -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']], // 定义行内公式分隔符
+          displayMath: [['$$', '$$'], ['\\[', '\\]']], // 定义行间公式分隔符
+          processEscapes: true // 处理 \$, 等转义字符
+        },
+        svg: {
+          fontCache: 'global' // 使用全局字体缓存以提高渲染速度
+        },
+        options: {
+          // 忽略特定HTML标签内的数学公式处理，防止冲突
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+
     <!-- Diff library for comparing text versions -->
     <script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
 </head>
@@ -56,6 +77,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Client-side PDF generation library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

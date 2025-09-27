@@ -66,57 +66,43 @@ def get_papers():
 def process_single_file():
     """API: 处理单个指定的PDF文件，包括转换为Markdown和生成分析报告。"""
     data = request.json
-
-    # 从请求中获取必要的参数
     api_key = data.get('apiKey')
     filename = data.get('filename')
     model = data.get('model')
     temperature_markdown_str = data.get('temperature_markdown')
     temperature_analysis_str = data.get('temperature_analysis')
 
-    # 验证关键参数是否存在
+    # ... (此处省略未改变的参数校验和文件处理逻辑) ...
     required_params = {
-        'apiKey': api_key,
-        'filename': filename,
-        'model': model,
-        'temperature_markdown': temperature_markdown_str,
-        'temperature_analysis': temperature_analysis_str
+        'apiKey': api_key, 'filename': filename, 'model': model,
+        'temperature_markdown': temperature_markdown_str, 'temperature_analysis': temperature_analysis_str
     }
     for param, value in required_params.items():
-        if value is None:
-            return jsonify({"status": "error", "message": f"请求体中必须提供 '{param}' 参数。"}), 400
+        if value is None: return jsonify({"status": "error", "message": f"请求体中必须提供 '{param}' 参数。"}), 400
 
     try:
-        # 转换温度值为浮点数
         temperature_markdown = float(temperature_markdown_str)
         temperature_analysis = float(temperature_analysis_str)
-
         file_stem = Path(filename).stem
         file_path = file_service.PAPERS_DIR / filename
+        if not file_path.exists(): return jsonify(
+            {"status": "error", "message": f"文件 {filename} 未在服务器上找到。"}), 404
 
-        if not file_path.exists():
-            return jsonify({"status": "error", "message": f"文件 {filename} 未在服务器上找到。"}), 404
-
-        # 步骤1: 如果Markdown文件不存在，则进行转换
         markdown_path = file_service.MARKDOWNS_DIR / f"{file_stem}.md"
         if not markdown_path.exists():
             prompt_markdown = PROMPTS['single_analysis_markdown']
-            markdown_content = llm_service.analyze_pdf_content(
-                file_path, prompt_markdown, model, temperature_markdown, api_key
-            )
+            markdown_content = llm_service.analyze_pdf_content(file_path, prompt_markdown, model, temperature_markdown,
+                                                               api_key)
             file_service.save_markdown_result(file_stem, markdown_content)
 
-        # 步骤2: 如果分析报告不存在，则进行分析
         analysis_path = file_service.ANALYSES_DIR / f"{file_stem}.md"
         if not analysis_path.exists():
             prompt_analysis = PROMPTS['single_analysis_report']
-            analysis_content = llm_service.analyze_pdf_content(
-                file_path, prompt_analysis, model, temperature_analysis, api_key
-            )
+            analysis_content = llm_service.analyze_pdf_content(file_path, prompt_analysis, model, temperature_analysis,
+                                                               api_key)
             file_service.save_analysis_result(file_stem, analysis_content)
 
         return jsonify({"status": "success", "message": f"文件 {filename} 处理成功。"})
-
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Temperature 参数必须是有效的数字。"}), 400
     except Exception as e:
@@ -140,39 +126,23 @@ def get_comprehensive_report():
 @app.route('/api/comprehensive_analysis/start', methods=['POST'])
 def start_comprehensive_analysis():
     """API: 启动综合文献分析，生成并覆盖保存综述报告。"""
+    # ... (此函数未改变) ...
     data = request.json
-
-    # 获取并校验参数
-    api_key = data.get('apiKey')
-    model = data.get('model')
-    temperature_str = data.get('temperature')
-    selected_papers = data.get('papers', [])
-
-    if not api_key:
-        return jsonify({"status": "error", "message": "API Key 缺失。"}), 400
-    if not model:
-        return jsonify({"status": "error", "message": "必须提供 'model' 参数。"}), 400
-    if temperature_str is None:
-        return jsonify({"status": "error", "message": "必须提供 'temperature' 参数。"}), 400
-    if not selected_papers:
-        return jsonify({"status": "error", "message": "请至少选择一篇文献进行分析。"}), 400
-
+    api_key, model, temperature_str, selected_papers = data.get('apiKey'), data.get('model'), data.get(
+        'temperature'), data.get('papers', [])
+    if not api_key: return jsonify({"status": "error", "message": "API Key 缺失。"}), 400
+    if not model: return jsonify({"status": "error", "message": "必须提供 'model' 参数。"}), 400
+    if temperature_str is None: return jsonify({"status": "error", "message": "必须提供 'temperature' 参数。"}), 400
+    if not selected_papers: return jsonify({"status": "error", "message": "请至少选择一篇文献进行分析。"}), 400
     try:
         temperature = float(temperature_str)
         combined_text = file_service.get_combined_analysis_text(selected_papers)
-        if not combined_text:
-            return jsonify({"status": "error", "message": "未能读取所选文献的分析内容。"}), 500
-
-        # 格式化提示词并调用LLM服务
+        if not combined_text: return jsonify({"status": "error", "message": "未能读取所选文献的分析内容。"}), 500
         prompt = PROMPTS['comprehensive_analysis'].format(combined_text=combined_text)
         report_content = llm_service.generate_text_from_prompt([prompt], model, temperature, api_key)
         file_service.save_comprehensive_report(report_content)
-
-        return jsonify({
-            "status": "success",
-            "message": "综合分析报告 'Comprehensive_Report.md' 已生成/更新。",
-            "report": report_content
-        })
+        return jsonify({"status": "success", "message": "综合分析报告 'Comprehensive_Report.md' 已生成/更新。",
+                        "report": report_content})
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Temperature 参数必须是有效的数字。"}), 400
     except Exception as e:
@@ -189,43 +159,24 @@ def get_brainstorming_result():
 @app.route('/api/brainstorming/start', methods=['POST'])
 def start_brainstorming():
     """API: 基于文献分析进行头脑风暴，支持初次生成和后续修改。"""
+    # ... (此函数未改变) ...
     data = request.json
-
-    # 获取并校验参数
-    api_key = data.get('apiKey')
-    model = data.get('model')
-    temperature_str = data.get('temperature')
-    existing_results = data.get('existing_results')
-    modification_prompt = data.get('modification_prompt')
-
-    if not api_key:
-        return jsonify({"status": "error", "message": "API Key 缺失。"}), 400
-    if not model:
-        return jsonify({"status": "error", "message": "必须提供 'model' 参数。"}), 400
-    if temperature_str is None:
-        return jsonify({"status": "error", "message": "必须提供 'temperature' 参数。"}), 400
-
+    api_key, model, temperature_str, existing_results, modification_prompt = data.get('apiKey'), data.get(
+        'model'), data.get('temperature'), data.get('existing_results'), data.get('modification_prompt')
+    if not api_key: return jsonify({"status": "error", "message": "API Key 缺失。"}), 400
+    if not model: return jsonify({"status": "error", "message": "必须提供 'model' 参数。"}), 400
+    if temperature_str is None: return jsonify({"status": "error", "message": "必须提供 'temperature' 参数。"}), 400
     try:
         temperature = float(temperature_str)
-
-        # 根据是否存在修改指令，选择不同的提示词模板
         if modification_prompt and existing_results:
-            # 迭代修改逻辑
-            prompt = PROMPTS['brainstorming_modify'].format(
-                existing_results=existing_results,
-                modification_prompt=modification_prompt
-            )
+            prompt = PROMPTS['brainstorming_modify'].format(existing_results=existing_results,
+                                                            modification_prompt=modification_prompt)
         else:
-            # 初次生成逻辑
             source_text, error_message = file_service.get_brainstorming_source_text()
-            if error_message:
-                return jsonify({"status": "error", "message": error_message}), 404
+            if error_message: return jsonify({"status": "error", "message": error_message}), 404
             prompt = PROMPTS['brainstorming_generate'].format(source_text=source_text)
-
-        # 调用LLM服务并保存结果
         brainstorm_results = llm_service.generate_text_from_prompt([prompt], model, temperature, api_key)
         file_service.save_brainstorming_result(brainstorm_results)
-
         return jsonify({"status": "success", "results": brainstorm_results})
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Temperature 参数必须是有效的数字。"}), 400
@@ -235,123 +186,119 @@ def start_brainstorming():
 
 # --- 论文写作 API ---
 
-@app.route('/api/paper/content', methods=['GET'])
-def get_paper_content():
-    """API: 获取论文的完整内容JSON对象。"""
-    content = file_service.get_paper_content()
+@app.route('/api/papers/list', methods=['GET'])
+def list_writing_papers():
+    """API: 获取所有可编辑论文的列表。"""
+    papers = file_service.list_papers()
+    return jsonify(papers)
+
+
+@app.route('/api/paper/content/<paper_name>', methods=['GET'])
+def get_paper_content(paper_name):
+    """API: 获取指定名称论文的完整内容JSON对象。"""
+    content = file_service.get_paper_content(paper_name)
+    if content is None:
+        return jsonify({"status": "error", "message": "论文未找到"}), 404
     return jsonify(content)
 
 
-@app.route('/api/paper/save', methods=['POST'])
-def save_paper_content():
-    """API: 保存论文的完整内容JSON对象。"""
+@app.route('/api/paper/save/<paper_name>', methods=['POST'])
+def save_paper_content(paper_name):
+    """API: 保存指定名称论文的完整内容JSON对象。"""
     data = request.json
-    file_service.save_paper_content(data)
+    file_service.save_paper_content(paper_name, data)
     return jsonify({"status": "success", "message": "内容已保存。"})
+
+
+@app.route('/api/papers/new', methods=['POST'])
+def create_new_paper():
+    """API: 创建一篇新论文。"""
+    new_paper_meta = file_service.create_new_paper()
+    return jsonify({"status": "success", "paper": new_paper_meta})
+
+
+@app.route('/api/papers/delete/<paper_name>', methods=['DELETE'])
+def delete_paper(paper_name):
+    """API: 删除一篇论文。"""
+    if file_service.delete_paper(paper_name):
+        return jsonify({"status": "success", "message": "论文已删除。"})
+    return jsonify({"status": "error", "message": "论文未找到或删除失败。"}), 404
+
+
+@app.route('/api/papers/rename/<old_paper_name>', methods=['POST'])
+def rename_paper(old_paper_name):
+    """API: 重命名一篇论文，这将改变其文件名。"""
+    data = request.json
+    new_name = data.get('newName')
+    if not new_name:
+        return jsonify({"status": "error", "message": "必须提供新名称。"}), 400
+
+    success, message = file_service.rename_paper(old_paper_name, new_name)
+    if success:
+        return jsonify({"status": "success", "message": message})
+    else:
+        return jsonify({"status": "error", "message": message}), 500
 
 
 @app.route('/api/paper/generate', methods=['POST'])
 def generate_paper_section():
     """API: 为论文的特定部分生成、修改、扩写或润色内容。"""
     data = request.json
+    # ... (此函数的核心逻辑未改变，因为它操作的是前端发送的paper_data，是无状态的) ...
+    api_key, model, temperature_str, language, target_section, paper_data, action_type = \
+        data.get('apiKey'), data.get('model'), data.get('temperature'), data.get('language'), \
+            data.get('target_section'), data.get('paper_data'), data.get('action_type')
 
-    # 获取并校验参数
-    api_key = data.get('apiKey')
-    model = data.get('model')
-    temperature_str = data.get('temperature')
-    language = data.get('language')
-    target_section = data.get('target_section')
-    paper_data = data.get('paper_data')
-    action_type = data.get('action_type')  # 'generate', 'modify', 'expand', 'polish'
-
-    required_params = {
-        'apiKey': api_key, 'model': model, 'temperature': temperature_str,
-        'language': language, 'target_section': target_section, 'paper_data': paper_data,
-        'action_type': action_type
-    }
+    required_params = {'apiKey': api_key, 'model': model, 'temperature': temperature_str, 'language': language,
+                       'target_section': target_section, 'paper_data': paper_data, 'action_type': action_type}
     for param, value in required_params.items():
-        if value is None:
-            return jsonify({"status": "error", "message": f"请求体中必须提供 '{param}' 参数。"}), 400
+        if value is None: return jsonify({"status": "error", "message": f"请求体中必须提供 '{param}' 参数。"}), 400
 
-    user_prompt = data.get('user_prompt', '')  # 'modify' action needs this
-
+    user_prompt = data.get('user_prompt', '')
     try:
         temperature = float(temperature_str)
-
-        # 构建提示词的基础部分
         prompt_parts = [PROMPTS['paper_section_base'].format(language=language)]
-
-        # 定义章节依赖关系和显示名称
-        dependencies = {
-            'title': ['idea'], 'abstract': ['idea', 'title'], 'keywords': ['title', 'abstract'],
-            'introduction': ['title', 'abstract'], 'background': ['title', 'abstract'],
-            'methods': ['title', 'abstract', 'background'],
-            'results': ['title', 'abstract', 'methods'],
-            'discussion': ['title', 'abstract', 'methods', 'results'],
-            'conclusion': ['title', 'abstract', 'methods', 'results', 'discussion']
-        }
-        section_names = {
-            'idea': '核心想法', 'title': '标题', 'abstract': '摘要', 'keywords': '关键词',
-            'introduction': '引言', 'background': '理论背景与假设建立', 'methods': '研究方法',
-            'results': '结果', 'discussion': '讨论', 'conclusion': '结论'
-        }
-
-        # 动态构建上下文信息
+        dependencies = {'title': ['idea'], 'abstract': ['idea', 'title'], 'keywords': ['title', 'abstract'],
+                        'introduction': ['title', 'abstract'], 'background': ['title', 'abstract'],
+                        'methods': ['title', 'abstract', 'background'], 'results': ['title', 'abstract', 'methods'],
+                        'discussion': ['title', 'abstract', 'methods', 'results'],
+                        'conclusion': ['title', 'abstract', 'methods', 'results', 'discussion']}
+        section_names = {'idea': '核心想法', 'title': '标题', 'abstract': '摘要', 'keywords': '关键词',
+                         'introduction': '引言', 'background': '理论背景与假设建立', 'methods': '研究方法',
+                         'results': '结果', 'discussion': '讨论', 'conclusion': '结论'}
         dep_keys = dependencies.get(target_section, [])
         context_parts = []
         for key in dep_keys:
             if paper_data.get(key, {}).get('content'):
                 display_name = section_names.get(key, key.capitalize())
                 context_parts.append(f"【{display_name}】:\n{paper_data[key]['content']}")
-
         if context_parts:
             context_string = "\n\n".join(context_parts)
             prompt_parts.append(PROMPTS['paper_section_context_header'].format(context_string=context_string))
 
-        # 根据 action_type 构建指令部分
         display_target_name = section_names.get(target_section, target_section.capitalize())
+        action_map = {'generate': 'paper_section_instruction_generate', 'modify': 'paper_section_instruction_modify',
+                      'expand': 'paper_section_instruction_expand', 'polish': 'paper_section_instruction_polish'}
+        prompt_key = action_map.get(action_type)
+        if not prompt_key: return jsonify({"status": "error", "message": f"无效的 action_type: {action_type}"}), 400
 
-        action_to_prompt_map = {
-            'generate': 'paper_section_instruction_generate',
-            'modify': 'paper_section_instruction_modify',
-            'expand': 'paper_section_instruction_expand',
-            'polish': 'paper_section_instruction_polish'
-        }
-
-        prompt_template_key = action_to_prompt_map.get(action_type)
-        if not prompt_template_key:
-            return jsonify({"status": "error", "message": f"无效的 action_type: {action_type}"}), 400
-
-        prompt_template = PROMPTS[prompt_template_key]
-
-        # 根据不同的action格式化提示词
+        prompt_template = PROMPTS[prompt_key]
         if action_type == 'generate':
             instruction = prompt_template.format(language=language, target_name=display_target_name)
         elif action_type == 'modify':
-            instruction = prompt_template.format(
-                target_name=display_target_name,
-                current_content=paper_data[target_section]['content'],
-                language=language,
-                user_prompt=user_prompt
-            )
-        else:  # 'expand' and 'polish'
-            instruction = prompt_template.format(
-                target_name=display_target_name,
-                current_content=paper_data[target_section]['content'],
-                language=language
-            )
+            instruction = prompt_template.format(target_name=display_target_name,
+                                                 current_content=paper_data[target_section]['content'],
+                                                 language=language, user_prompt=user_prompt)
+        else:
+            instruction = prompt_template.format(target_name=display_target_name,
+                                                 current_content=paper_data[target_section]['content'],
+                                                 language=language)
 
         prompt_parts.append(instruction)
-
-        # 添加输出格式要求
         prompt_parts.append(PROMPTS['paper_section_output_format'])
         final_prompt = "\n".join(prompt_parts)
-
-        # 调用LLM服务
         generated_content = llm_service.generate_text_from_prompt([final_prompt], model, temperature, api_key)
-
         return jsonify({"status": "success", "content": generated_content.strip()})
-
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Temperature 参数必须是有效的数字。"}), 400
     except Exception as e:
@@ -359,7 +306,6 @@ def generate_paper_section():
 
 
 if __name__ == '__main__':
-    # 确保在启动前所有必要的目录都已创建
     file_service.PAPERS_DIR.mkdir(exist_ok=True)
     file_service.RESULT_DIR.mkdir(exist_ok=True)
     app.run(debug=True, port=5001)
