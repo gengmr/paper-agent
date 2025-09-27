@@ -834,34 +834,53 @@ h3.paper-section-title {
     gap: 1rem;
 }
 
-/* Print-specific styles for PDF export */
+/*
+ * ==========================================================================
+ * -- Print-specific styles for Professional PDF Export --
+ * ==========================================================================
+ * 这部分样式仅在用户触发打印或“导出为PDF”功能时生效。
+ * 它的核心目标是：
+ * 1.  **清理界面**: 隐藏所有非内容的UI元素，如侧边栏、按钮、设置卡片等。
+ * 2.  **优化布局**: 将论文内容重置为适合A4纸张的布局，移除不必要的边距和阴影。
+ * 3.  **控制分页**: 智能地控制分页行为，避免章节标题和内容被切断。
+ * 4.  **设置页面属性**: 通过 `@page` 规则定义标准的打印边距。
+ *
+ * 最终效果是生成一份干净、专业、格式规范的学术文档PDF。
+ */
 @media print {
     body, .container {
-        display: block;
-        background-color: #fff;
+        display: block; /* 覆盖 flex 布局，使内容自然流动 */
+        background-color: #fff; /* 打印背景通常为白色 */
     }
+    /* 隐藏所有与论文内容无关的界面元素 */
     .sidebar, .page-header, .controls-card, .section-controls, #prompt-bar, .modal-overlay {
         display: none !important;
     }
+    /* 重置主内容区的样式以适应打印 */
     .main-content {
         padding: 0;
-        overflow: visible;
+        overflow: visible; /* 确保所有内容都能被打印 */
     }
+    /* 移除论文视图的视觉效果，使其成为纯粹的内容容器 */
     .paper-document-view {
         box-shadow: none;
         border: none;
         padding: 0;
     }
+    /* 尝试避免在单个论文章节内部强制分页，保持内容完整性 */
     .paper-section {
         page-break-inside: avoid;
     }
+    /* 优化分页：章节标题后不应立即分页，新章节可视情况另起一页 */
     h3.paper-section-title {
         page-break-after: avoid;
         page-break-before: auto;
     }
+    /* 确保文本在打印时是黑色，以获得最佳对比度 */
     .paper-section .content-display, .paper-section textarea {
         color: #000;
     }
+    /* 定义打印页面的边距，2cm符合多数学术规范 */
     @page {
         margin: 2cm;
     }
