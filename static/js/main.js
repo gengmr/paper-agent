@@ -460,7 +460,6 @@ if (diffModal) {
                     newPane.appendChild(createLine('added', newLineNum++, escapeHtml(line)));
                 });
             } else if (part.removed) {
-                // Lookahead to see if this is a modification
                 const nextPart = lineDiff[i + 1];
                 if (nextPart && nextPart.added) {
                     const wordDiff = Diff.diffWords(part.value, nextPart.value);
@@ -479,14 +478,14 @@ if (diffModal) {
                     });
                     oldPane.appendChild(createLine('removed', oldLineNum++, oldContent));
                     newPane.appendChild(createLine('added', newLineNum++, newContent));
-                    i++; // Skip next part
+                    i++;
                 } else {
                     lines.forEach(line => {
                         oldPane.appendChild(createLine('removed', oldLineNum++, escapeHtml(line)));
                         newPane.appendChild(createLine('empty', null, ''));
                     });
                 }
-            } else { // context
+            } else {
                 lines.forEach(line => {
                     oldPane.appendChild(createLine('context', oldLineNum++, escapeHtml(line)));
                     newPane.appendChild(createLine('context', newLineNum++, escapeHtml(line)));
@@ -498,7 +497,6 @@ if (diffModal) {
         onRejectCallback = onReject;
         diffModal.classList.add('visible');
 
-        // Sync scrolling
         const oldPaneScroll = oldPane.parentElement;
         const newPaneScroll = newPane.parentElement;
         let isSyncing = false;
@@ -508,7 +506,7 @@ if (diffModal) {
             isSyncing = true;
             const other = e.target === oldPaneScroll ? newPaneScroll : oldPaneScroll;
             other.scrollTop = e.target.scrollTop;
-            setTimeout(() => { isSyncing = false; }, 50); // Debounce to prevent scroll fight
+            setTimeout(() => { isSyncing = false; }, 50);
         };
 
         oldPaneScroll.onscroll = onScroll;
@@ -774,7 +772,6 @@ function initPaperWritingPage() {
             const result = await response.json();
 
             if (response.ok) {
-                // Call the globally defined showDiffModal function
                 showDiffModal(
                     originalContent, result.content,
                     () => { // onAccept
@@ -819,6 +816,17 @@ function initPaperWritingPage() {
         try {
             const response = await fetch('/api/paper/content');
             paperState = await response.json();
+
+            // 状态自愈机制：防止因异常中断导致永久转圈
+            // 此处遍历加载的数据，如果发现有任何部分的 status 处于 'generating'
+            // 就将其强制重置为一个合理状态，从而修复被污染的存档。
+            Object.keys(paperState).forEach(key => {
+                if (paperState[key] && paperState[key].status === 'generating') {
+                    // 根据是否存在内容来决定恢复到 'completed' 还是 'empty'
+                    paperState[key].status = paperState[key].content.trim() ? 'completed' : 'empty';
+                }
+            });
+
             renderPaperState();
         } catch (error) {
             console.error('加载论文数据失败:', error);
