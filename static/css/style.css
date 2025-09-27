@@ -286,7 +286,7 @@ input[type="range"]::-moz-range-thumb {
 .status-message.success { color: var(--success-color); }
 .status-message.error { color: var(--error-color); }
 
-.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-expand, .btn-polish {
+.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-expand, .btn-polish, .btn-edit, .btn-modify {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: var(--border-radius-md);
@@ -667,9 +667,60 @@ h3.paper-section-title {
     gap: 0.75rem;
     flex-wrap: wrap;
 }
-.section-controls .btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
-.btn-expand { background-color: #8e44ad; color: white; } /* Purple */
-.btn-polish { background-color: #16a085; color: white; } /* Teal */
+
+/* --- [NEW] Refined Button Styles for Paper Writing Section --- */
+.section-controls .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border: 1px solid transparent; /* Base border for consistent sizing */
+    background-clip: padding-box;
+}
+
+/* Edit Button Style: Subtle, inviting outline */
+.btn-edit {
+    background-color: transparent;
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+.btn-edit:hover, .btn-edit:focus {
+    background-color: rgba(74, 144, 226, 0.1); /* Soft blue highlight */
+    color: var(--accent-color); /* Ensure color stays */
+}
+
+/* Modify Button Style: Warm, constructive amber */
+.btn-modify {
+    background-color: #e67e22; /* Carrot Orange */
+    color: white;
+    border-color: #d35400; /* Darker border for depth */
+}
+.btn-modify:hover, .btn-modify:focus {
+    background-color: #d35400;
+    border-color: #d35400;
+    color: white;
+}
+
+/* Expand Button Style: Rich, creative purple gradient */
+.btn-expand {
+    background-image: linear-gradient(45deg, #8e44ad, #9b59b6);
+    color: white;
+    border: none;
+}
+.btn-expand:hover, .btn-expand:focus {
+    background-image: linear-gradient(45deg, #803a9b, #8a48a5);
+    color: white;
+}
+
+/* Polish Button Style: Fresh, refined teal gradient */
+.btn-polish {
+    background-image: linear-gradient(45deg, #16a085, #1abc9c);
+    color: white;
+    border: none;
+}
+.btn-polish:hover, .btn-polish:focus {
+    background-image: linear-gradient(45deg, #138d75, #17a589);
+    color: white;
+}
+/* --- End of Refined Button Styles --- */
 
 /* -- Idea Section Specifics -- */
 #idea-container .paper-section {

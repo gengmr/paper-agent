@@ -684,16 +684,40 @@ function initPaperWritingPage() {
             }
 
             // 5. 更新操作按钮的可见性和状态
-            const generateBtn = sectionEl.querySelector('.btn-generate'), modifyBtn = sectionEl.querySelector('.btn-modify'), expandBtn = sectionEl.querySelector('.btn-expand'), polishBtn = sectionEl.querySelector('.btn-polish');
-            const allActionButtons = [generateBtn, modifyBtn, expandBtn, polishBtn].filter(Boolean);
+            const generateBtn = sectionEl.querySelector('.btn-generate'),
+                modifyBtn = sectionEl.querySelector('.btn-modify'),
+                expandBtn = sectionEl.querySelector('.btn-expand'),
+                polishBtn = sectionEl.querySelector('.btn-polish'),
+                editBtn = sectionEl.querySelector('.btn-edit'),
+                saveBtn = sectionEl.querySelector('.btn-save'),
+                cancelBtn = sectionEl.querySelector('.btn-cancel');
 
-            allActionButtons.forEach(btn => btn.disabled = isAIGenerating);
+            const allActionButtons = [generateBtn, modifyBtn, expandBtn, polishBtn, editBtn].filter(Boolean);
+            const allEditingButtons = [saveBtn, cancelBtn].filter(Boolean);
 
-            const showActionButtons = sectionData.status === 'completed' && !isEditingThisSection;
-            if (generateBtn) generateBtn.style.display = (sectionData.status === 'empty' && !isEditingThisSection) ? 'inline-block' : 'none';
-            if (modifyBtn) modifyBtn.style.display = showActionButtons ? 'inline-block' : 'none';
-            if (expandBtn) expandBtn.style.display = showActionButtons ? 'inline-block' : 'none';
-            if (polishBtn) polishBtn.style.display = showActionButtons ? 'inline-block' : 'none';
+            // 全局禁用（当AI正在生成时）
+            [...allActionButtons, ...allEditingButtons].forEach(btn => btn.disabled = isAIGenerating);
+
+            if (isEditingThisSection) {
+                // --- 编辑模式 ---
+                // 隐藏所有AI操作和编辑按钮, 显示保存和取消
+                allActionButtons.forEach(btn => btn.style.display = 'none');
+                allEditingButtons.forEach(btn => btn.style.display = 'inline-block');
+            } else {
+                // --- 显示模式 ---
+                // 隐藏保存和取消按钮
+                allEditingButtons.forEach(btn => btn.style.display = 'none');
+
+                const isCompleted = sectionData.status === 'completed';
+                const isEmpty = sectionData.status === 'empty';
+
+                // 根据状态决定显示哪些AI操作和编辑按钮
+                if (editBtn) editBtn.style.display = !isLocked ? 'inline-block' : 'none';
+                if (generateBtn) generateBtn.style.display = isEmpty ? 'inline-block' : 'none';
+                if (modifyBtn) modifyBtn.style.display = isCompleted ? 'inline-block' : 'none';
+                if (expandBtn) expandBtn.style.display = isCompleted ? 'inline-block' : 'none';
+                if (polishBtn) polishBtn.style.display = isCompleted ? 'inline-block' : 'none';
+            }
         });
     }
 
@@ -704,11 +728,16 @@ function initPaperWritingPage() {
             const sectionConfig = sections[key];
             const titleNumber = sectionConfig.number ? `<span class="section-number">${sectionConfig.number}</span>` : '';
             const titleHTML = `<h3 class="paper-section-title">${titleNumber}${sectionConfig.name}</h3>`;
-            const sectionControlsHTML = key === 'idea' ? '' : `
-                <button class="btn btn-primary btn-generate" data-section="${key}">生成</button>
-                <button class="btn btn-secondary btn-modify" data-section="${key}">修改</button>
-                <button class="btn btn-expand" data-section="${key}">扩写</button>
-                <button class="btn btn-polish" data-section="${key}">润色</button>
+            const sectionControlsHTML = `
+                <button class="btn btn-secondary btn-edit" data-section="${key}">编辑</button>
+                <button class="btn btn-success btn-save" data-section="${key}">保存</button>
+                <button class="btn btn-secondary btn-cancel" data-section="${key}">取消</button>
+                ${key !== 'idea' ? `
+                    <button class="btn btn-primary btn-generate" data-section="${key}">生成</button>
+                    <button class="btn btn-secondary btn-modify" data-section="${key}">修改</button>
+                    <button class="btn btn-expand" data-section="${key}">扩写</button>
+                    <button class="btn btn-polish" data-section="${key}">润色</button>
+                ` : ''}
             `;
             const sectionHTML = `<div class="paper-section" data-key="${key}" id="section-${key}"><div class="section-header"><div class="header-left"><div class="status-indicator locked"><i class="fas fa-lock"></i></div><div class="title-block">${titleHTML}${sectionConfig.dependencies.length > 0 ? '<div class="dependencies-info"></div>' : ''}</div></div><div class="header-right section-controls">${sectionControlsHTML}</div></div><div class="content-display" data-section="${key}"></div><textarea id="textarea-${key}" data-section="${key}" style="display: none;"></textarea></div>`;
 
@@ -883,41 +912,58 @@ function initPaperWritingPage() {
     // 主交互处理器：使用事件委托处理所有点击和输入事件。
     function handleInteraction(e) {
         const target = e.target;
-        // 处理AI操作按钮点击
+
+        // 处理所有功能按钮的点击
         const button = target.closest('button[data-section]');
         if (button) {
             const sectionKey = button.dataset.section;
+
+            // 编辑控制按钮
+            if (button.matches('.btn-edit')) {
+                editingSection = sectionKey;
+                renderPaperState();
+                return;
+            }
+            if (button.matches('.btn-save')) {
+                const textarea = document.getElementById(`textarea-${sectionKey}`);
+                if (textarea) {
+                    paperState[sectionKey].content = textarea.value;
+                    scheduleSave();
+                }
+                editingSection = null;
+                renderPaperState();
+                return;
+            }
+            if (button.matches('.btn-cancel')) {
+                editingSection = null;
+                renderPaperState();
+                return;
+            }
+
+            // AI 操作按钮
             if (button.matches('.btn-generate')) performSectionAction(sectionKey, 'generate');
             else if (button.matches('.btn-expand')) performSectionAction(sectionKey, 'expand');
             else if (button.matches('.btn-polish')) performSectionAction(sectionKey, 'polish');
-            else if (button.matches('.btn-modify')) { // “修改”按钮比较特殊，它激活全局输入栏
+            else if (button.matches('.btn-modify')) { // “修改”按钮激活全局输入栏
                 promptBar.style.display = 'flex';
                 globalPromptInput.placeholder = `为"${sections[sectionKey].name}"提供修改指令...`;
                 globalPromptInput.focus();
                 submitPromptBtn.dataset.section = sectionKey;
-            } return;
+            }
+            return;
         }
-        // 处理内容区域点击，切换到编辑模式
-        const displayDiv = target.closest('.content-display[data-section]');
-        if (displayDiv) {
-            const sectionKey = displayDiv.dataset.section;
-            if (paperState[sectionKey].status !== 'locked') { editingSection = sectionKey; renderPaperState(); } return;
-        }
+
         // 处理文本框输入，更新状态并安排保存
         if (target.matches('textarea[data-section]')) {
             const sectionKey = target.dataset.section;
             paperState[sectionKey].content = target.value;
-            adjustTextareaHeight(target); scheduleSave();
+            adjustTextareaHeight(target);
+            scheduleSave();
         }
     }
+
     document.body.addEventListener('click', handleInteraction);
     document.body.addEventListener('input', handleInteraction);
-    // 当用户焦点离开文本框时，退出编辑模式
-    document.body.addEventListener('focusout', (e) => {
-        if (e.target.matches('textarea')) {
-            editingSection = null; renderPaperState();
-        }
-    });
 
     // 封装调用后端API执行AI操作（生成、修改等）的通用函数。
     async function performSectionAction(sectionKey, actionType, userPrompt = '') {
