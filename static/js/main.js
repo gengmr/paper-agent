@@ -559,6 +559,8 @@ function initPaperWritingPage() {
 
     // 状态管理变量
     let paperState = {};
+    let paperStructure = []; // 将从后端加载配置
+    let paperStructureMap = {}; // 用于通过 key 快速查找
     let saveTimeout;
     let editingSection = null;
     let currentPaperId = null;
@@ -566,23 +568,19 @@ function initPaperWritingPage() {
     let currentAnnotationCallback = null;
     let floatingToolbar;
 
-    const sections = {
-        idea: { name: '核心想法', dependencies: [], number: null }, title: { name: '标题', dependencies: ['idea'], number: null },
-        abstract: { name: '摘要', dependencies: ['idea', 'title'], number: null }, keywords: { name: '关键词', dependencies: ['title', 'abstract'], number: null },
-        introduction: { name: '引言', dependencies: ['title', 'abstract'], number: '1.' }, background: { name: '理论背景与假设建立', dependencies: ['title', 'abstract'], number: '2.' },
-        methods: { name: '研究方法', dependencies: ['title', 'abstract', 'background'], number: '3.' }, results: { name: '结果', dependencies: ['title', 'abstract', 'methods'], number: '4.' },
-        discussion: { name: '讨论', dependencies: ['title', 'abstract', 'methods', 'results'], number: '5.' }, conclusion: { name: '结论', dependencies: ['title', 'abstract', 'methods', 'results', 'discussion'], number: '6.' },
-    };
-
     function adjustTextareaHeight(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }
 
     function renderPaperState() {
-        Object.keys(sections).forEach(key => {
+        if (!paperStructure.length) return; // 确保在结构加载后才渲染
+
+        paperStructure.forEach(sectionConfig => {
+            const key = sectionConfig.key;
             const sectionEl = document.querySelector(`.paper-section[data-key="${key}"]`);
             if (!sectionEl || !paperState[key]) return;
-            const sectionData = paperState[key];
 
-            const isLocked = !sections[key].dependencies.every(dep => paperState[dep]?.status === 'completed');
+            const sectionData = paperState[key];
+            const isLocked = !sectionConfig.dependencies.every(dep => paperState[dep]?.status === 'completed');
+
             if (sectionData.status !== 'generating') {
                 sectionData.status = isLocked ? 'locked' : (sectionData.content.trim() === '' ? 'empty' : 'completed');
             }
@@ -595,7 +593,15 @@ function initPaperWritingPage() {
             }
 
             const depInfo = sectionEl.querySelector('.dependencies-info');
-            if (depInfo) depInfo.innerHTML = sections[key].dependencies.map(dep => { const isCompleted = paperState[dep]?.status === 'completed'; const icon = isCompleted ? '<i class="fas fa-check-circle icon"></i>' : '<i class="fas fa-times-circle icon"></i>'; return `<span class="dep-item ${isCompleted ? 'completed' : 'pending'}">${icon} ${sections[dep].name}</span>`; }).join(' ') || '无依赖';
+            if (depInfo) {
+                depInfo.innerHTML = sectionConfig.dependencies.map(depKey => {
+                    const depConfig = paperStructureMap[depKey];
+                    const depName = depConfig ? depConfig.name : depKey;
+                    const isCompleted = paperState[depKey]?.status === 'completed';
+                    const icon = isCompleted ? '<i class="fas fa-check-circle icon"></i>' : '<i class="fas fa-times-circle icon"></i>';
+                    return `<span class="dep-item ${isCompleted ? 'completed' : 'pending'}">${icon} ${depName}</span>`;
+                }).join(' ') || '无依赖';
+            }
 
             const isEditingThisSection = editingSection === key;
             const displayDiv = sectionEl.querySelector('.content-display');
@@ -636,38 +642,50 @@ function initPaperWritingPage() {
     }
 
     function createInitialStructure() {
+        if (!paperStructure.length) return;
         ideaContainer.innerHTML = ''; paperContainer.innerHTML = '';
-        for (const key in sections) {
-            const sectionConfig = sections[key];
-            const titleNumber = sectionConfig.number ? `<span class="section-number">${sectionConfig.number}</span>` : '';
+        let numberedSectionCounter = 1;
+
+        paperStructure.forEach(sectionConfig => {
+            const key = sectionConfig.key;
+            const titleNumber = sectionConfig.numbered ? `<span class="section-number">${numberedSectionCounter++}.</span>` : '';
             const titleHTML = `<h3 class="paper-section-title">${titleNumber}${sectionConfig.name}</h3>`;
             const sectionControlsHTML = `
                 <button class="btn btn-secondary btn-edit" data-section="${key}">编辑</button>
-                <button class="btn btn-success btn-save" data-section="${key}">保存</button>
-                <button class="btn btn-secondary btn-cancel" data-section="${key}">取消</button>
-                ${key !== 'idea' ? `
-                    <button class="btn btn-primary btn-generate" data-section="${key}">生成</button>
-                    <button class="btn btn-modify" data-section="${key}">修改</button>
-                    <button class="btn btn-modify-annotated" data-section="${key}">批注修改</button>
-                    <button class="btn btn-expand" data-section="${key}">扩写</button>
-                    <button class="btn btn-polish" data-section="${key}">润色</button>
-                ` : ''}
+                <button class="btn btn-success btn-save" data-section="${key}" style="display:none;">保存</button>
+                <button class="btn btn-secondary btn-cancel" data-section="${key}" style="display:none;">取消</button>
+                <button class="btn btn-primary btn-generate" data-section="${key}" style="display:none;">生成</button>
+                <button class="btn btn-modify" data-section="${key}" style="display:none;">修改</button>
+                <button class="btn btn-modify-annotated" data-section="${key}" style="display:none;">批注修改</button>
+                <button class="btn btn-expand" data-section="${key}" style="display:none;">扩写</button>
+                <button class="btn btn-polish" data-section="${key}" style="display:none;">润色</button>
             `;
-            const sectionHTML = `<div class="paper-section" data-key="${key}" id="section-${key}"><div class="section-header"><div class="header-left"><div class="status-indicator locked"><i class="fas fa-lock"></i></div><div class="title-block">${titleHTML}${sectionConfig.dependencies.length > 0 ? '<div class="dependencies-info"></div>' : ''}</div></div><div class="header-right section-controls">${sectionControlsHTML}</div></div><div class="content-display" data-section="${key}"></div><textarea id="textarea-${key}" data-section="${key}" style="display: none;"></textarea></div>`;
+            const sectionHTML = `<div class="paper-section" data-key="${key}" id="section-${key}">
+                <div class="section-header">
+                    <div class="header-left">
+                        <div class="status-indicator locked"><i class="fas fa-lock"></i></div>
+                        <div class="title-block">
+                            ${titleHTML}
+                            ${sectionConfig.dependencies.length > 0 ? '<div class="dependencies-info"></div>' : ''}
+                        </div>
+                    </div>
+                    <div class="header-right section-controls">${sectionControlsHTML}</div>
+                </div>
+                <div class="content-display" data-section="${key}"></div>
+                <textarea id="textarea-${key}" data-section="${key}" style="display: none;"></textarea>
+            </div>`;
 
-            if (key === 'idea') ideaContainer.insertAdjacentHTML('beforeend', sectionHTML);
-            else paperContainer.insertAdjacentHTML('beforeend', sectionHTML);
-        }
+            if (key === 'idea') {
+                ideaContainer.insertAdjacentHTML('beforeend', sectionHTML);
+            } else {
+                paperContainer.insertAdjacentHTML('beforeend', sectionHTML);
+            }
+        });
     }
 
-    /**
-     * 创建浮动工具栏，用于在编辑模式下提供快捷操作，如“添加批注”。
-     * 此函数动态创建DOM元素并附加到页面，其样式在CSS中定义。
-     */
     function createFloatingToolbar() {
         floatingToolbar = document.createElement('div');
         floatingToolbar.id = 'floating-editor-toolbar';
-        // 核心变更：使用更优雅的 'fa-highlighter' 图标。
         floatingToolbar.innerHTML = `<button class="btn btn-toolbar btn-add-annotation" title="添加批注"><i class="fas fa-highlighter"></i></button>`;
         document.body.appendChild(floatingToolbar);
 
@@ -681,24 +699,16 @@ function initPaperWritingPage() {
 
             showAnnotationModal('', (comment) => {
                 if (comment && comment.trim() !== '') {
-                    // 关键修复：优化操作序列以防止视图跳转。
-                    // 1. 保存精确的滚动和光标位置。
                     const scrollTop = textarea.scrollTop;
                     const newText = `{{${selectedText}}}【修改意见：${comment.trim()}】`;
                     const finalCursorPos = start + newText.length;
 
-                    // 2. 更新文本内容并安排保存。
                     textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
                     paperState[editingSection].content = textarea.value;
                     scheduleSave();
 
-                    // 3. 调整高度。这是可能导致跳转的关键步骤。
                     adjustTextareaHeight(textarea);
-
-                    // 4. 强制恢复滚动位置。这是防止跳转的核心。
                     textarea.scrollTop = scrollTop;
-
-                    // 5. 最后，设置焦点和光标位置。
                     textarea.focus();
                     textarea.setSelectionRange(finalCursorPos, finalCursorPos);
                 }
@@ -706,11 +716,6 @@ function initPaperWritingPage() {
         });
     }
 
-    /**
-     * 更新浮动工具栏的位置。
-     * 此函数被重写以实现新的定位逻辑：将工具栏精确放置在当前编辑文本域的左侧并垂直居中。
-     * 它会动态计算坐标并应用到工具栏元素上，同时确保其在页面滚动或缩放时保持跟随。
-     */
     function updateToolbarPosition() {
         if (!floatingToolbar || !editingSection) {
             if (floatingToolbar) floatingToolbar.classList.remove('visible');
@@ -726,18 +731,12 @@ function initPaperWritingPage() {
         const mainContentRect = mainContent.getBoundingClientRect();
         const toolbarWidth = floatingToolbar.offsetWidth;
         const toolbarHeight = floatingToolbar.offsetHeight;
-        const gap = 15; // 定义工具栏与文本域之间的安全间距
+        const gap = 15;
 
-        // 垂直方向上，计算文本域的中心点并对齐工具栏的中心点
         let top = taRect.top + taRect.height / 2 - toolbarHeight / 2;
-
-        // 水平方向上，定位到文本域的左边界之外，并减去工具栏自身宽度和间距
         let left = taRect.left - toolbarWidth - gap;
 
-        // 约束工具栏的垂直位置，确保它不会超出主内容区域的顶部或底部
         top = Math.max(mainContentRect.top + gap, Math.min(top, mainContentRect.bottom - toolbarHeight - gap));
-
-        // 约束工具栏的水平位置，确保它不会与左侧的侧边栏重叠
         left = Math.max(mainContentRect.left + gap, left);
 
         floatingToolbar.style.top = `${top}px`;
@@ -751,12 +750,16 @@ function initPaperWritingPage() {
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(async () => {
             try {
-                await fetch(`/api/paper/save/${currentPaperId}`, {
+                const response = await fetch(`/api/paper/save/${currentPaperId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(paperState),
                 });
-            } catch (error) { console.error('自动保存失败:', error); }
+                 if (!response.ok) {
+                    const err = await response.json();
+                    console.error('自动保存失败:', err.message);
+                }
+            } catch (error) { console.error('自动保存网络错误:', error); }
         }, 1000);
     }
 
@@ -771,14 +774,20 @@ function initPaperWritingPage() {
         ideaContainer.style.display = 'block';
         try {
             const response = await fetch(`/api/paper/content/${paperId}`);
-            if (!response.ok) throw new Error('未能加载论文内容');
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || '未能加载论文内容');
+            }
             paperState = await response.json();
             currentPaperId = paperId;
             localStorage.setItem('currentPaperId', paperId);
 
-            Object.keys(paperState).forEach(key => {
-                if (paperState[key] && paperState[key].status === 'generating') {
-                    paperState[key].status = paperState[key].content.trim() ? 'completed' : 'empty';
+            paperStructure.forEach(section => {
+                if (!paperState[section.key]) {
+                    paperState[section.key] = { content: '', status: 'locked' };
+                }
+                 if (paperState[section.key].status === 'generating') {
+                    paperState[section.key].status = paperState[section.key].content.trim() ? 'completed' : 'empty';
                 }
             });
 
@@ -786,7 +795,26 @@ function initPaperWritingPage() {
             renderPaperState();
         } catch (error) {
             console.error('加载论文数据失败:', error);
-            alert('加载论文数据失败，请重试。');
+            alert(`加载论文数据失败: ${error.message}`);
+            // 如果加载失败，可能是文件被删除了，此时应刷新列表
+            await loadPaperList();
+        }
+    }
+
+    async function createNewPaperAndReload() {
+        try {
+            const response = await fetch('/api/papers/new', { method: 'POST' });
+            const result = await response.json();
+            if (result.status === 'success') {
+                localStorage.setItem('currentPaperId', result.paper.id);
+                // 直接加载新创建的论文，而不是刷新整个列表，体验更流畅
+                await loadPaperList();
+            } else {
+                 throw new Error(result.message);
+            }
+        } catch (error) {
+            console.error('创建新论文失败:', error);
+            alert(`创建新论文失败: ${error.message}`);
         }
     }
 
@@ -795,23 +823,24 @@ function initPaperWritingPage() {
             const response = await fetch('/api/papers/list');
             const papers = await response.json();
             paperSelect.innerHTML = '';
+
             if (papers.length === 0) {
-                paperSelect.innerHTML = '<option value="">无可用文章</option>';
-                currentPaperId = null;
-                localStorage.removeItem('currentPaperId');
-                await loadPaperContent(null);
-            } else {
-                papers.forEach(paper => {
-                    const option = new Option(paper.documentName, paper.id);
-                    paperSelect.add(option);
-                });
-                let idToLoad = localStorage.getItem('currentPaperId');
-                if (!papers.some(p => p.id === idToLoad)) {
-                    idToLoad = papers[0].id;
-                }
-                paperSelect.value = idToLoad;
-                await loadPaperContent(idToLoad);
+                // **关键逻辑修复**：如果列表为空，不再只是显示提示，而是自动创建第一篇
+                await createNewPaperAndReload();
+                return;
             }
+
+            papers.forEach(paper => {
+                const option = new Option(paper.documentName, paper.id);
+                paperSelect.add(option);
+            });
+            let idToLoad = localStorage.getItem('currentPaperId');
+            if (!papers.some(p => p.id === idToLoad)) {
+                idToLoad = papers[0].id;
+            }
+            paperSelect.value = idToLoad;
+            await loadPaperContent(idToLoad);
+
         } catch (error) {
             console.error('加载论文列表失败:', error);
         }
@@ -841,7 +870,7 @@ function initPaperWritingPage() {
 
 
     paperSelect.addEventListener('change', () => { const selectedId = paperSelect.value; if (selectedId && selectedId !== currentPaperId) loadPaperContent(selectedId); });
-    newPaperBtn.addEventListener('click', async () => { try { const response = await fetch('/api/papers/new', { method: 'POST' }); const result = await response.json(); if (result.status === 'success') { localStorage.setItem('currentPaperId', result.paper.id); await loadPaperList(); } } catch (error) { console.error('创建新论文失败:', error); } });
+    newPaperBtn.addEventListener('click', createNewPaperAndReload);
     renameBtn.addEventListener('click', async () => { const newName = renameInput.value.trim(); if (!newName || !currentPaperId || newName === currentPaperId) return; try { const response = await fetch(`/api/papers/rename/${currentPaperId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ newName }) }); const result = await response.json(); if (result.status === 'success') { localStorage.setItem('currentPaperId', newName); await loadPaperList(); } else { alert(`重命名失败: ${result.message}`); renameInput.value = currentPaperId; } } catch (error) { console.error('重命名失败:', error); } });
     deleteBtn.addEventListener('click', async () => { if (!currentPaperId) return; if (confirm(`确定要删除文章 "${paperState.documentName}" 吗？此操作无法撤销。`)) { try { await fetch(`/api/papers/delete/${currentPaperId}`, { method: 'DELETE' }); localStorage.removeItem('currentPaperId'); await loadPaperList(); } catch (error) { console.error('删除失败:', error); } } });
     exportPdfBtn.addEventListener('click', () => { if (!currentPaperId) { alert("请先选择一篇要导出的文章。"); return; } const originalTitle = document.title; const paperTitle = paperState.title?.content.trim() || paperState.documentName || '未命名论文'; const safeFileName = paperTitle.replace(/[\/\\?%*:|"<>]/g, '-').replace(/\s+/g, ' ').trim(); document.title = safeFileName; window.print(); setTimeout(() => { document.title = originalTitle; }, 1000); });
@@ -849,7 +878,6 @@ function initPaperWritingPage() {
     function handleInteraction(e) {
         const target = e.target;
 
-        // --- 批注管理 ---
         const annotatedText = target.closest('.annotated-text');
         if (annotatedText) {
             e.stopPropagation();
@@ -869,10 +897,7 @@ function initPaperWritingPage() {
             const rect = annotatedText.getBoundingClientRect();
             popover.style.left = `${rect.left}px`;
             popover.style.top = `${rect.bottom + 8}px`;
-            requestAnimationFrame(() => {
-                popover.classList.add('visible');
-            });
-
+            requestAnimationFrame(() => { popover.classList.add('visible'); });
 
             popover.querySelector('.btn-edit-annotation').addEventListener('click', () => {
                 const sectionKey = annotatedText.closest('.paper-section').dataset.key;
@@ -887,7 +912,6 @@ function initPaperWritingPage() {
                 });
                 popover.remove();
             });
-
             popover.querySelector('.btn-delete-annotation').addEventListener('click', () => {
                 const sectionKey = annotatedText.closest('.paper-section').dataset.key;
                 const rawToken = decodeURIComponent(annotatedText.dataset.rawToken);
@@ -908,18 +932,12 @@ function initPaperWritingPage() {
             return;
         }
 
-
         const button = target.closest('button[data-section]');
         if (button) {
             const sectionKey = button.dataset.section;
+            const sectionConfig = paperStructureMap[sectionKey];
 
-            if (button.matches('.btn-edit')) {
-                editingSection = sectionKey;
-                renderPaperState();
-                const textarea = document.getElementById(`textarea-${sectionKey}`);
-                if (textarea) textarea.focus({ preventScroll: true });
-                return;
-            }
+            if (button.matches('.btn-edit')) { editingSection = sectionKey; renderPaperState(); const textarea = document.getElementById(`textarea-${sectionKey}`); if (textarea) textarea.focus({ preventScroll: true }); return; }
             if (button.matches('.btn-save')) { const textarea = document.getElementById(`textarea-${sectionKey}`); if (textarea) { paperState[sectionKey].content = textarea.value; scheduleSave(); } editingSection = null; renderPaperState(); return; }
             if (button.matches('.btn-cancel')) { editingSection = null; renderPaperState(); return; }
 
@@ -929,16 +947,13 @@ function initPaperWritingPage() {
             else if (button.matches('.btn-modify-annotated')) performSectionAction(sectionKey, 'modify_annotated');
             else if (button.matches('.btn-modify')) {
                 promptBar.style.display = 'flex';
-                globalPromptInput.placeholder = `为"${sections[sectionKey].name}"提供修改指令...`;
+                globalPromptInput.placeholder = `为"${sectionConfig.name}"提供修改指令...`;
                 globalPromptInput.focus();
                 submitPromptBtn.dataset.section = sectionKey;
             }
             return;
         }
 
-        // 关键修复：确保只有在用户输入（'input'事件）时才调整文本域高度。
-        // 此举解决了在文本域中点击（'click'事件）时光标跳转的问题，
-        // 因为点击不再触发可能导致页面重排的高度调整。
         if (e.type === 'input' && target.matches('textarea[data-section]')) {
             const sectionKey = target.dataset.section;
             paperState[sectionKey].content = target.value;
@@ -1006,11 +1021,25 @@ function initPaperWritingPage() {
     globalPromptInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitPromptBtn.click(); } });
 
     async function initialize() {
-        createInitialStructure();
-        createFloatingToolbar();
-        await loadPaperList();
-        mainContent.addEventListener('scroll', updateToolbarPosition);
-        window.addEventListener('resize', updateToolbarPosition);
+        try {
+            const response = await fetch('/api/paper/structure');
+            if (!response.ok) throw new Error('无法从服务器加载论文结构。');
+            paperStructure = await response.json();
+            paperStructure.forEach(s => paperStructureMap[s.key] = s);
+
+            createInitialStructure();
+            createFloatingToolbar();
+            await loadPaperList();
+            mainContent.addEventListener('scroll', updateToolbarPosition);
+            window.addEventListener('resize', updateToolbarPosition);
+        } catch (error) {
+            console.error('页面初始化失败:', error);
+            mainContent.innerHTML = `<div class="content-card" style="color: var(--error-color);">
+                <h2>页面加载失败</h2>
+                <p>无法初始化论文写作模块。请确保后端服务正在运行，并检查浏览器控制台以获取更多错误信息。</p>
+                <p><strong>错误详情:</strong> ${error.message}</p>
+            </div>`;
+        }
     }
 
     initialize();

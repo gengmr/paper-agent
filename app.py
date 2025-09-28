@@ -1,10 +1,12 @@
 # app.py
 from flask import Flask, render_template, request, jsonify
 from pathlib import Path
+import traceback
 
 # 导入我们的服务模块和配置
 from services import file_service, llm_service
-from config import AVAILABLE_MODELS  # 导入模型列表
+# 导入模型列表和新的论文结构配置
+from config import AVAILABLE_MODELS, PAPER_STRUCTURE, PAPER_STRUCTURE_MAP
 
 app = Flask(__name__)
 
@@ -72,21 +74,23 @@ def process_single_file():
     temperature_markdown_str = data.get('temperature_markdown')
     temperature_analysis_str = data.get('temperature_analysis')
 
-    # ... (此处省略未改变的参数校验和文件处理逻辑) ...
+    # 参数校验
     required_params = {
         'apiKey': api_key, 'filename': filename, 'model': model,
         'temperature_markdown': temperature_markdown_str, 'temperature_analysis': temperature_analysis_str
     }
     for param, value in required_params.items():
-        if value is None: return jsonify({"status": "error", "message": f"请求体中必须提供 '{param}' 参数。"}), 400
+        if value is None:
+            return jsonify({"status": "error", "message": f"请求体中必须提供 '{param}' 参数。"}), 400
 
     try:
+        # 文件处理逻辑
         temperature_markdown = float(temperature_markdown_str)
         temperature_analysis = float(temperature_analysis_str)
         file_stem = Path(filename).stem
         file_path = file_service.PAPERS_DIR / filename
-        if not file_path.exists(): return jsonify(
-            {"status": "error", "message": f"文件 {filename} 未在服务器上找到。"}), 404
+        if not file_path.exists():
+            return jsonify({"status": "error", "message": f"文件 {filename} 未在服务器上找到。"}), 404
 
         markdown_path = file_service.MARKDOWNS_DIR / f"{file_stem}.md"
         if not markdown_path.exists():
@@ -126,7 +130,6 @@ def get_comprehensive_report():
 @app.route('/api/comprehensive_analysis/start', methods=['POST'])
 def start_comprehensive_analysis():
     """API: 启动综合文献分析，生成并覆盖保存综述报告。"""
-    # ... (此函数未改变) ...
     data = request.json
     api_key, model, temperature_str, selected_papers = data.get('apiKey'), data.get('model'), data.get(
         'temperature'), data.get('papers', [])
@@ -159,7 +162,6 @@ def get_brainstorming_result():
 @app.route('/api/brainstorming/start', methods=['POST'])
 def start_brainstorming():
     """API: 基于文献分析进行头脑风暴，支持初次生成和后续修改。"""
-    # ... (此函数未改变) ...
     data = request.json
     api_key, model, temperature_str, existing_results, modification_prompt = data.get('apiKey'), data.get(
         'model'), data.get('temperature'), data.get('existing_results'), data.get('modification_prompt')
@@ -186,43 +188,66 @@ def start_brainstorming():
 
 # --- 论文写作 API ---
 
+@app.route('/api/paper/structure', methods=['GET'])
+def get_paper_structure():
+    """API: 获取在 config.py 中定义的论文结构配置。"""
+    return jsonify(PAPER_STRUCTURE)
+
+
 @app.route('/api/papers/list', methods=['GET'])
 def list_writing_papers():
     """API: 获取所有可编辑论文的列表。"""
-    papers = file_service.list_papers()
-    return jsonify(papers)
+    try:
+        papers = file_service.list_papers()
+        return jsonify(papers)
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"无法列出论文: {e}"}), 500
 
 
 @app.route('/api/paper/content/<paper_name>', methods=['GET'])
 def get_paper_content(paper_name):
     """API: 获取指定名称论文的完整内容JSON对象。"""
-    content = file_service.get_paper_content(paper_name)
-    if content is None:
-        return jsonify({"status": "error", "message": "论文未找到"}), 404
-    return jsonify(content)
+    try:
+        content = file_service.get_paper_content(paper_name)
+        if content is None:
+            return jsonify({"status": "error", "message": "论文未找到"}), 404
+        return jsonify(content)
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"无法获取论文内容: {e}"}), 500
 
 
 @app.route('/api/paper/save/<paper_name>', methods=['POST'])
 def save_paper_content(paper_name):
     """API: 保存指定名称论文的完整内容JSON对象。"""
-    data = request.json
-    file_service.save_paper_content(paper_name, data)
-    return jsonify({"status": "success", "message": "内容已保存。"})
+    try:
+        data = request.json
+        file_service.save_paper_content(paper_name, data)
+        return jsonify({"status": "success", "message": "内容已保存。"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"保存失败: {e}"}), 500
 
 
 @app.route('/api/papers/new', methods=['POST'])
 def create_new_paper():
     """API: 创建一篇新论文。"""
-    new_paper_meta = file_service.create_new_paper()
-    return jsonify({"status": "success", "paper": new_paper_meta})
+    try:
+        new_paper_meta = file_service.create_new_paper()
+        return jsonify({"status": "success", "paper": new_paper_meta})
+    except Exception as e:
+        # 打印详细错误到服务器控制台，方便调试
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": f"创建新论文失败: {e}"}), 500
 
 
 @app.route('/api/papers/delete/<paper_name>', methods=['DELETE'])
 def delete_paper(paper_name):
     """API: 删除一篇论文。"""
-    if file_service.delete_paper(paper_name):
-        return jsonify({"status": "success", "message": "论文已删除。"})
-    return jsonify({"status": "error", "message": "论文未找到或删除失败。"}), 404
+    try:
+        if file_service.delete_paper(paper_name):
+            return jsonify({"status": "success", "message": "论文已删除。"})
+        return jsonify({"status": "error", "message": "论文未找到或删除失败。"}), 404
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"删除失败: {e}"}), 500
 
 
 @app.route('/api/papers/rename/<old_paper_name>', methods=['POST'])
@@ -232,19 +257,23 @@ def rename_paper(old_paper_name):
     new_name = data.get('newName')
     if not new_name:
         return jsonify({"status": "error", "message": "必须提供新名称。"}), 400
-
-    success, message = file_service.rename_paper(old_paper_name, new_name)
-    if success:
-        return jsonify({"status": "success", "message": message})
-    else:
-        return jsonify({"status": "error", "message": message}), 500
+    try:
+        success, message = file_service.rename_paper(old_paper_name, new_name)
+        if success:
+            return jsonify({"status": "success", "message": message})
+        else:
+            # 根据 file_service 返回的具体错误信息设置状态码
+            status_code = 409 if "已存在同名论文" in message else 500
+            return jsonify({"status": "error", "message": message}), status_code
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"重命名时发生未知错误: {e}"}), 500
 
 
 @app.route('/api/paper/generate', methods=['POST'])
 def generate_paper_section():
     """
     API: 为论文的特定部分生成或修改内容。
-    支持多种操作类型，包括初次生成、基于全局指令的修改、基于内联标注的修改、扩写和润色。
+    现在完全由 config.py驱动，支持动态的依赖关系和章节名称。
     """
     data = request.json
     api_key, model, temperature_str, language, target_section, paper_data, action_type = \
@@ -260,25 +289,24 @@ def generate_paper_section():
     try:
         temperature = float(temperature_str)
         prompt_parts = [PROMPTS['paper_section_base'].format(language=language)]
-        dependencies = {'title': ['idea'], 'abstract': ['idea', 'title'], 'keywords': ['title', 'abstract'],
-                        'introduction': ['title', 'abstract'], 'background': ['title', 'abstract'],
-                        'methods': ['title', 'abstract', 'background'], 'results': ['title', 'abstract', 'methods'],
-                        'discussion': ['title', 'abstract', 'methods', 'results'],
-                        'conclusion': ['title', 'abstract', 'methods', 'results', 'discussion']}
-        section_names = {'idea': '核心想法', 'title': '标题', 'abstract': '摘要', 'keywords': '关键词',
-                         'introduction': '引言', 'background': '理论背景与假设建立', 'methods': '研究方法',
-                         'results': '结果', 'discussion': '讨论', 'conclusion': '结论'}
-        dep_keys = dependencies.get(target_section, [])
+
+        target_section_config = PAPER_STRUCTURE_MAP.get(target_section)
+        if not target_section_config:
+            return jsonify({"status": "error", "message": f"未知的论文部分: {target_section}"}), 400
+
+        dep_keys = target_section_config.get('dependencies', [])
         context_parts = []
         for key in dep_keys:
             if paper_data.get(key, {}).get('content'):
-                display_name = section_names.get(key, key.capitalize())
+                dep_section_config = PAPER_STRUCTURE_MAP.get(key)
+                display_name = dep_section_config['name'] if dep_section_config else key.capitalize()
                 context_parts.append(f"【{display_name}】:\n{paper_data[key]['content']}")
+
         if context_parts:
             context_string = "\n\n".join(context_parts)
             prompt_parts.append(PROMPTS['paper_section_context_header'].format(context_string=context_string))
 
-        display_target_name = section_names.get(target_section, target_section.capitalize())
+        display_target_name = target_section_config['name']
         action_map = {'generate': 'paper_section_instruction_generate',
                       'modify': 'paper_section_instruction_modify',
                       'modify_annotated': 'paper_section_instruction_modify_annotated',
@@ -313,6 +341,7 @@ def generate_paper_section():
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Temperature 参数必须是有效的数字。"}), 400
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)}), 500
 
 

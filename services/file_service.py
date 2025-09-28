@@ -6,6 +6,9 @@ import re
 from pathlib import Path
 from datetime import datetime
 
+# 导入配置
+from config import PAPER_STRUCTURE
+
 # 定义项目中的关键目录
 BASE_DIR = Path(__file__).resolve().parent.parent
 PAPERS_DIR = BASE_DIR / "papers"
@@ -129,70 +132,85 @@ def get_brainstorming_result_content():
 # --- 论文写作相关文件服务 ---
 
 def get_default_paper_structure():
-    """返回一个空的论文结构字典，用于初始化新论文"""
-    return {
-        "idea": {"content": "", "status": "empty"}, "title": {"content": "", "status": "locked"},
-        "abstract": {"content": "", "status": "locked"}, "keywords": {"content": "", "status": "locked"},
-        "introduction": {"content": "", "status": "locked"}, "background": {"content": "", "status": "locked"},
-        "methods": {"content": "", "status": "locked"}, "results": {"content": "", "status": "locked"},
-        "discussion": {"content": "", "status": "locked"}, "conclusion": {"content": "", "status": "locked"},
-    }
+    """
+    根据 config.py 中的 PAPER_STRUCTURE 配置动态生成一个空的、标准的论文结构字典。
+    此函数用于初始化一篇全新的论文。
+    """
+    structure = {}
+    for section_config in PAPER_STRUCTURE:
+        key = section_config['key']
+        # 'idea' 或任何无依赖的章节作为起点，状态为 'empty'。其他依赖未完成的章节状态为 'locked'。
+        initial_status = "empty" if not section_config['dependencies'] else "locked"
+        structure[key] = {"content": "", "status": initial_status}
+    return structure
 
 
 def list_papers():
-    """列出所有论文，使用文件名作为唯一标识和名称"""
+    """
+    扫描 paper_writing 目录，返回所有论文的元数据列表。
+    每个元数据包含 id 和 documentName，均源自文件名。
+    """
     papers_meta = []
     for paper_file in PAPER_WRITING_DIR.glob("*.json"):
-        # 论文的 ID 和 documentName 均直接来源于文件名（不含扩展名）
         paper_name = paper_file.stem
         papers_meta.append({
             "id": paper_name,
             "documentName": paper_name
         })
-    # 按名称字母顺序排序
     return sorted(papers_meta, key=lambda p: p["documentName"])
 
 
 def create_new_paper():
-    """创建一篇新论文，确保文件名唯一，并返回其元数据"""
+    """
+    核心创建函数：在文件系统中创建一个新的 .json 论文文件。
+    1. 计算一个唯一的文件名 (例如 "未命名论文 1")。
+    2. 生成一个默认的论文结构。
+    3. 将此结构保存到新的 .json 文件中。
+    4. 返回新论文的元数据。
+    """
     base_name = "未命名论文"
     i = 1
-    # 循环查找一个不存在的文件名
     while (PAPER_WRITING_DIR / f"{base_name} {i}.json").exists():
         i += 1
-
     document_name = f"{base_name} {i}"
 
     new_paper_data = get_default_paper_structure()
     new_paper_data['id'] = document_name
     new_paper_data['documentName'] = document_name
 
+    # 关键步骤：调用保存函数，实际地创建文件并写入初始内容
     save_paper_content(document_name, new_paper_data)
 
     return {"id": document_name, "documentName": document_name}
 
 
 def get_paper_content(paper_name: str):
-    """根据论文名称（文件名）读取其JSON内容"""
+    """
+    只读操作：根据论文名称（文件名）读取并返回其JSON内容。
+    - 如果文件不存在，明确返回 None。
+    - 如果文件存在但格式损坏，返回一个默认结构以防止前端崩溃。
+    - 此函数不再有创建文件的副作用。
+    """
     paper_path = PAPER_WRITING_DIR / f"{paper_name}.json"
     if not paper_path.exists():
-        # 如果请求的论文不存在（例如首次启动），则创建一个新的
-        if not list_papers():
-            new_paper = create_new_paper()
-            return get_paper_content(new_paper['id'])
         return None
 
     try:
         with open(paper_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            # 确保即使文件为空也能正常处理
+            content = f.read()
+            if not content:
+                return get_default_paper_structure()
+            return json.loads(content)
     except (json.JSONDecodeError, IOError):
-        # 如果文件损坏，返回默认结构以防止前端崩溃
         return get_default_paper_structure()
 
 
 def save_paper_content(paper_name: str, data: dict):
-    """将论文内容写入指定名称的JSON文件"""
-    # 确保存储在JSON内部的名称与文件名一致
+    """
+    核心保存函数：将给定的论文数据（字典）写入到指定的 .json 文件中。
+    此函数用于创建新文件和更新现有文件。
+    """
     data['documentName'] = paper_name
     data['id'] = paper_name
 
@@ -201,8 +219,11 @@ def save_paper_content(paper_name: str, data: dict):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-def delete_paper(paper_name: str):
-    """根据论文名称删除对应的JSON文件"""
+def delete_paper(paper_name: str) -> bool:
+    """
+    从文件系统中删除指定的 .json 论文文件。
+    如果文件存在并成功删除，返回 True，否则返回 False。
+    """
     paper_path = PAPER_WRITING_DIR / f"{paper_name}.json"
     if paper_path.exists():
         paper_path.unlink()
@@ -210,9 +231,12 @@ def delete_paper(paper_name: str):
     return False
 
 
-def rename_paper(old_name: str, new_name: str):
-    """重命名论文，包括物理文件名和文件内部的元数据"""
-    # 校验新文件名，移除不安全的字符
+def rename_paper(old_name: str, new_name: str) -> (bool, str):
+    """
+    重命名一篇论文，这包括：
+    1. 物理重命名 .json 文件。
+    2. 更新文件内部的 'id' 和 'documentName' 字段以保持一致。
+    """
     safe_new_name = re.sub(r'[\\/*?:"<>|]', "", new_name).strip()
     if not safe_new_name:
         return False, "新名称无效"
@@ -222,29 +246,22 @@ def rename_paper(old_name: str, new_name: str):
 
     if not old_path.exists():
         return False, "原始论文未找到"
-
     if old_name == safe_new_name:
         return True, "名称未改变"
-
     if new_path.exists():
         return False, "已存在同名论文，请使用其他名称"
 
     try:
-        # 读取旧文件内容
-        with open(old_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = get_paper_content(old_name)
+        if data is None:
+            return False, "无法读取原始论文内容"
 
-        # 更新内部名称和ID以匹配新文件名
         data['documentName'] = safe_new_name
         data['id'] = safe_new_name
 
-        # 将更新后的内容写入新文件
-        with open(new_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-        # 删除旧文件
+        save_paper_content(safe_new_name, data)
         old_path.unlink()
 
         return True, "重命名成功"
-    except (IOError, json.JSONDecodeError) as e:
+    except Exception as e:
         return False, f"处理文件时出错: {e}"
