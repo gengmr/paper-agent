@@ -1,30 +1,33 @@
 /* static/css/style.css */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Lato:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&family=Source+Serif+4:wght@400;500;700&display=swap');
 
 :root {
-    /* -- Refined Academic Design System -- */
-    --primary-color: #3a506b;
-    --accent-color: #4a90e2;
-    --bg-color: #f7f9fc;
-    --card-bg: #ffffff;
-    --text-color: #333333;
-    --text-muted: #6c757d;
-    --border-color: #e9ecef;
-    --hover-bg-color: #f8f9fa;
-    --shadow-color: rgba(58, 80, 107, 0.1);
-    --success-color: #1e8449;
-    --error-color: #c0392b;
-    --danger-color: #d9534f;
-    --warning-color: #f39c12;
-    --processing-color: var(--accent-color);
-    --locked-color: #909da9;
+    /* -- Academic Design System -- */
+    --primary-color: #0B3954;      /* 深普鲁士蓝 */
+    --accent-color: #B8860B;       /* 赭石金 */
+    --bg-color: #F9F7F3;           /* 纸莎草白 */
+    --card-bg: #FFFFFF;           /* 象牙白 */
+    --text-color: #1A1A1A;         /* 近黑色 */
+    --text-muted: #666666;         /* 中性灰 */
+    --border-color: #EAEAEA;       /* 浅灰色 */
+    --hover-bg-color: #f5f5f5;
+
+    --success-color: #2A785A;      /* 暗森林绿 */
+    --error-color: #A43820;        /* 深砖红 */
+    --danger-color: #A43820;
+    --warning-color: var(--accent-color);
+    --processing-color: #0B3954;
+    --locked-color: #909DA9;
     --empty-color: var(--accent-color);
-    --font-serif: 'Noto Serif SC', serif;
-    --font-sans: 'Lato', sans-serif;
+
+    --font-sans: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-serif: 'Source Serif 4', 'Noto Serif SC', serif;
     --font-mono: 'SF Mono', 'Consolas', 'Liberation Mono', Menlo, Courier, monospace;
-    --border-radius-sm: 6px;
-    --border-radius-md: 10px;
-    --border-radius-lg: 16px;
+
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+
     --transition-speed: 0.3s;
     --transition-curve: cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -65,9 +68,8 @@ body {
     flex-shrink: 0;
     border-right: 1px solid var(--border-color);
     z-index: 1001;
-    overflow: hidden;
+    overflow-x: hidden;
     transition: width var(--transition-speed) var(--transition-curve);
-    box-shadow: 0 0 20px var(--shadow-color);
 }
 
 .sidebar:hover {
@@ -79,25 +81,29 @@ body {
     align-items: center;
     padding: 2rem 1.5rem;
     white-space: nowrap;
+    height: 90px;
 }
 
 .sidebar-header .icon {
-    font-size: 2rem;
+    font-size: 2.25rem;
+    font-weight: 500;
     color: var(--primary-color);
-    min-width: 30px;
+    min-width: 48px;
+    text-align: center;
 }
 
 .sidebar-title {
     font-family: var(--font-serif);
     font-size: 1.5rem;
     font-weight: 500;
-    margin-left: 1.25rem;
+    margin-left: 0.75rem;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
 
 .sidebar:hover .sidebar-title {
     opacity: 1;
+    transition-delay: 0.1s;
 }
 
 .sidebar ul {
@@ -114,45 +120,32 @@ body {
     white-space: nowrap;
     position: relative;
     transition: background-color 0.2s, color 0.2s;
-}
-
-.sidebar ul li a::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%) scaleY(0);
-    width: 4px;
-    height: 60%;
-    background-color: var(--accent-color);
-    border-radius: 0 4px 4px 0;
-    transition: transform var(--transition-speed) var(--transition-curve);
+    border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+    margin-right: 1rem;
 }
 
 .sidebar ul li a:hover {
-    background-color: var(--hover-bg-color);
+    background-color: rgba(11, 57, 84, 0.05); /* Primary color at 5% opacity */
     color: var(--primary-color);
 }
 
-.sidebar ul li a:hover::before {
-    transform: translateY(-50%) scaleY(1);
-}
-
 .sidebar .icon {
-    font-size: 1.25rem;
-    min-width: 30px;
+    font-size: 1.5rem;
+    min-width: 48px;
     text-align: center;
 }
 
 .sidebar .link-text {
-    margin-left: 1.5rem;
+    margin-left: 1rem;
     opacity: 0;
     transition: opacity 0.2s ease;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 0.95rem;
 }
 
 .sidebar:hover .link-text {
     opacity: 1;
+    transition-delay: 0.1s;
 }
 
 /* -- Main Content Area -- */
@@ -166,7 +159,6 @@ body {
 
 .page-header {
     margin-bottom: 2.5rem;
-    border-bottom: 1px solid var(--border-color);
     padding-bottom: 1.5rem;
 }
 
@@ -188,22 +180,16 @@ body {
 
 .content-card, .controls-card {
     background-color: var(--card-bg);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
+    border-radius: var(--border-radius-md);
+    padding: 2.5rem;
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px var(--shadow-color);
-    transition: box-shadow var(--transition-speed) var(--transition-curve);
-}
-
-.content-card:hover, .controls-card:hover {
-    box-shadow: 0 8px 24px var(--shadow-color);
 }
 
 h2, h3 {
     font-family: var(--font-serif);
     font-weight: 500;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
     color: var(--primary-color);
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--border-color);
@@ -211,24 +197,25 @@ h2, h3 {
 
 /* -- Forms & Controls -- */
 .controls-card .control-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
 }
 
 .controls-card label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
     color: var(--text-muted);
-    font-weight: bold;
+    font-weight: 600;
     font-size: 0.9rem;
 }
 
 select, input[type="password"], input[type="text"], textarea {
     width: 100%;
-    padding: 0.75rem 1rem;
-    background-color: #fff;
-    border: 1px solid var(--border-color);
+    padding: 0.75rem 0.1rem;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #ccc;
     color: var(--text-color);
-    border-radius: var(--border-radius-md);
+    border-radius: 0;
     font-size: 1rem;
     font-family: inherit;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -236,86 +223,48 @@ select, input[type="password"], input[type="text"], textarea {
 
 select:focus, input:focus, textarea:focus {
     outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
+    border-bottom: 2px solid var(--primary-color);
 }
 
 input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 8px;
-    background: #e9ecef;
-    border-radius: 5px;
-    outline: none;
-    padding: 0;
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px; background: #e9ecef;
+    border-radius: 3px; outline: none; padding: 0;
 }
 input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: var(--accent-color);
-    cursor: pointer;
-    border-radius: 50%;
-    border: 3px solid var(--card-bg);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    -webkit-appearance: none; appearance: none;
+    width: 20px; height: 20px; background: var(--primary-color);
+    cursor: pointer; border-radius: 50%;
 }
 input[type="range"]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: var(--accent-color);
-    cursor: pointer;
-    border-radius: 50%;
-    border: 3px solid var(--card-bg);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 20px; height: 20px; background: var(--primary-color);
+    cursor: pointer; border-radius: 50%;
 }
 
 .api-key-form {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    margin-top: 1rem;
+    display: flex; gap: 0.75rem; align-items: center; margin-top: 1rem;
 }
 
 .status-message {
-    margin-top: 1rem;
-    font-weight: 500;
-    height: 20px;
+    margin-top: 1rem; font-weight: 500; height: 20px;
 }
 .status-message.success { color: var(--success-color); }
 .status-message.error { color: var(--error-color); }
 
 .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-expand, .btn-polish, .btn-edit, .btn-modify, .btn-modify-annotated {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: var(--border-radius-md);
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1rem;
+    padding: 0.75rem 1.5rem; border: none; border-radius: var(--border-radius-md);
+    cursor: pointer; font-weight: 600; font-size: 0.95rem;
     transition: all 0.2s ease;
-    flex-shrink: 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
 }
-.btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-.btn:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-.btn:not(:disabled):active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
-}
+.btn:disabled { cursor: not-allowed; opacity: 0.6; }
 
-.btn-primary { background-color: var(--accent-color); color: white; }
-.btn-secondary { background-color: #6c757d; color: #fff; }
+.btn-primary { background-color: var(--primary-color); color: white; }
+.btn-primary:hover:not(:disabled) { background-color: #082b40; }
+
+.btn-secondary { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); }
+.btn-secondary:hover:not(:disabled) { background-color: var(--hover-bg-color); color: var(--text-color); border-color: #ccc; }
+
 .btn-success { background-color: var(--success-color); color: #fff; }
 .btn-danger { background-color: var(--danger-color); color: #fff; }
 
@@ -323,105 +272,67 @@ input[type="range"]::-moz-range-thumb {
 #paper-list-container ul, #analyzed-paper-list ul {
     list-style: none;
 }
-
-#paper-list-container li, #analyzed-paper-list li {
-    background-color: var(--hover-bg-color);
-    padding: 1rem 1.5rem;
-    margin-bottom: 0.75rem;
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-color);
+.selection-controls {
+    margin-bottom: 1rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all var(--transition-speed) var(--transition-curve);
+    gap: 0.5rem;
+}
+#paper-list-container li, #analyzed-paper-list li {
+    background-color: var(--card-bg); padding: 1rem 1.5rem; margin-bottom: 0.75rem;
+    border-radius: var(--border-radius-sm); border: 1px solid var(--border-color);
+    display: flex; justify-content: space-between; align-items: center;
+    transition: border-color 0.2s;
 }
 #paper-list-container li:hover, #analyzed-paper-list li:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px var(--shadow-color);
-    border-color: var(--accent-color);
+    border-color: var(--primary-color);
 }
-
 .status-indicator {
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    color: #fff;
+    padding: 0.25rem 0.75rem; border-radius: 999px;
+    font-size: 0.8rem; font-weight: bold; color: #fff;
 }
 .status-processed { background-color: var(--success-color); }
-.status-pending { background-color: var(--warning-color); color: #333; }
+.status-pending { background-color: var(--warning-color); color: var(--text-color); }
 .status-processing { background-color: var(--processing-color); }
 .status-failed { background-color: var(--error-color); }
 
 .log-container {
-    background-color: #e9ecef;
-    color: #343a40;
-    font-family: var(--font-mono);
-    padding: 1rem;
-    border-radius: var(--border-radius-md);
-    margin-bottom: 1.5rem;
-    max-height: 250px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    border: 1px solid #ced4da;
+    background-color: #f0ebe5; color: #343a40; font-family: var(--font-mono);
+    padding: 1rem; border-radius: var(--border-radius-sm); margin-bottom: 1.5rem;
+    max-height: 250px; overflow-y: auto; white-space: pre-wrap;
+    border: 1px solid var(--border-color);
 }
 
 /* -- Markdown Content -- */
 .markdown-content {
-    background-color: transparent;
-    padding: 1.5rem;
-    line-height: 1.9;
-    font-size: 1rem;
+    font-family: var(--font-serif);
+    line-height: 1.8; font-size: 1rem;
 }
 .markdown-content h1, .markdown-content h2, .markdown-content h3 {
-    font-family: var(--font-serif);
-    margin-top: 2em;
-    margin-bottom: 1em;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5em;
-    font-weight: 500;
+    font-family: var(--font-serif); margin-top: 2em; margin-bottom: 1em;
+    border-bottom: 1px solid var(--border-color); padding-bottom: 0.5em; font-weight: 500;
 }
 .markdown-content p { margin-bottom: 1.25em; }
 .markdown-content ul, .markdown-content ol { padding-left: 2em; margin-bottom: 1.25em; }
 .markdown-content code {
-    background-color: #e9ecef;
-    padding: 0.2em 0.4em;
-    border-radius: var(--border-radius-sm);
-    font-family: var(--font-mono);
-    font-size: 0.9em;
-    color: var(--primary-color);
+    background-color: #f0ebe5; padding: 0.2em 0.4em; border-radius: var(--border-radius-sm);
+    font-family: var(--font-mono); font-size: 0.9em; color: var(--primary-color);
 }
 .markdown-content pre {
-    background-color: var(--hover-bg-color);
-    padding: 1.25em;
-    border-radius: var(--border-radius-md);
-    overflow-x: auto;
-    border: 1px solid var(--border-color);
+    background-color: #f0ebe5; padding: 1.25em; border-radius: var(--border-radius-md);
+    overflow-x: auto; border: 1px solid var(--border-color);
 }
 .markdown-content blockquote {
-    border-left: 4px solid var(--accent-color);
-    padding: 0.5em 1.5em;
-    color: var(--text-muted);
-    margin: 1.5em 0;
-    background-color: var(--hover-bg-color);
+    border-left: 3px solid var(--accent-color); padding: 0.5em 1.5em;
+    color: var(--text-muted); margin: 1.5em 0; background-color: transparent;
 }
 
 /* -- Fixed Bottom Bars -- */
 .modification-bar {
-    position: fixed;
-    bottom: 0;
-    left: 80px;
-    right: 0;
-    background-color: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 1rem 1.5rem;
-    border-top: 1px solid var(--border-color);
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.06);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    z-index: 1000;
+    position: fixed; bottom: 0; left: 80px; right: 0;
+    background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color); box-shadow: 0 -4px 15px rgba(0,0,0,0.06);
+    display: flex; align-items: center; gap: 1rem; z-index: 1000;
     transition: left var(--transition-speed) var(--transition-curve);
 }
 body:has(.sidebar:hover) .modification-bar {
@@ -430,760 +341,267 @@ body:has(.sidebar:hover) .modification-bar {
 
 /* --- Paper Writing Page Specific Styles --- */
 
-/**
- * ========================================================================
- * Refined Management Card Styles
- *
- * 此区域的样式经过全面优化，以提升“文章管理与工具”和“AI全局设置”
- * 面板的视觉精致度和用户体验。
- * ========================================================================
- */
 #paper-management-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem 2.5rem;
+    gap: 2rem 3rem;
     align-items: start;
-    padding: 2.5rem;
-    background-color: var(--card-bg);
 }
-
-@media (max-width: 992px) {
-    #paper-management-card { grid-template-columns: 1fr; }
-}
-
 #paper-management-card .card-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* 统一组内间距 */
+    display: flex; flex-direction: column; gap: 1.5rem;
 }
-
-#paper-management-card .section-title {
-    font-family: var(--font-serif);
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: var(--primary-color);
-    margin: 0 0 0.5rem 0;
-    padding: 0;
-    border: none;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+#paper-management-card h3.section-title {
+    font-size: 1.2rem; margin: 0; padding: 0; border: none;
+    display: flex; align-items: center; gap: 0.75rem;
 }
-
-#paper-management-card h3 { border: none; }
-
-#paper-management-card .control-group {
-    margin: 0;
-}
-
+#paper-management-card .control-group { margin: 0; }
 #paper-management-card label {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase; /* 标签大写，增加设计感 */
-    letter-spacing: 0.5px;
+    font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;
+    text-transform: uppercase; letter-spacing: 0.5px;
 }
-
-/* 统一定制输入框和下拉选择框的样式 */
-#paper-management-card select,
-#paper-management-card input[type="text"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 100%;
-    background-color: var(--bg-color); /* 使用比白色稍深的背景 */
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-md);
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-    color: var(--text-color);
-    transition: all 0.2s var(--transition-curve);
+#paper-management-card select, #paper-management-card input[type="text"] {
+    background-color: var(--bg-color); border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md); padding: 0.75rem 1rem;
+    font-size: 0.95rem; border-bottom: 1px solid var(--border-color);
 }
-
-/* 为下拉选择框添加自定义的箭头图标 */
-#paper-management-card select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 1em;
-    padding-right: 2.5rem; /* 为箭头腾出空间 */
+#paper-management-card select:focus, #paper-management-card input[type="text"]:focus {
+    background-color: var(--card-bg); border-color: var(--primary-color);
+    border-bottom: 1px solid var(--primary-color); box-shadow: 0 0 0 3px rgba(11, 57, 84, 0.1);
 }
-
-#paper-management-card select:focus,
-#paper-management-card input[type="text"]:focus {
-    background-color: var(--card-bg);
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
-}
-
-/* 优化带按钮的输入框组 */
-.input-with-button {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.input-with-button > *:first-child {
-    flex-grow: 1;
-}
-
-/* 优化图标按钮样式 */
+.input-with-button { display: flex; gap: 0.5rem; }
+.input-with-button > *:first-child { flex-grow: 1; }
 #new-paper-btn, #rename-paper-btn, #delete-paper-btn {
-    flex-shrink: 0;
-    width: 42px; /* 统一尺寸 */
-    height: 42px;
-    font-size: 1rem;
-    padding: 0;
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-color);
-    background-color: var(--card-bg);
-}
-#new-paper-btn { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
-#new-paper-btn:hover { background-color: #3b82e0; }
-#rename-paper-btn { color: var(--text-muted); }
-#rename-paper-btn:hover { background-color: var(--hover-bg-color); color: var(--primary-color); }
-#delete-paper-btn { color: var(--text-muted); }
-#delete-paper-btn:hover { background-color: var(--danger-color); color: #fff; border-color: var(--danger-color); }
-
-/* 优化导出按钮 */
-#export-pdf-btn {
-    width: 100%;
-    background-image: linear-gradient(45deg, var(--success-color), #27ae60);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 10px rgba(30, 132, 73, 0.2);
-}
-#export-pdf-btn:hover {
-    background-image: linear-gradient(45deg, #196f3d, #229954);
-    box-shadow: 0 6px 15px rgba(30, 132, 73, 0.3);
-}
-
-/* 优化滑块（Temperature）样式 */
-#paper-management-card input[type="range"] {
-    height: 6px;
-    background: linear-gradient(90deg, var(--accent-color) 0%, #a2c6f0 100%);
-    border-radius: 3px;
-    padding: 0;
-}
-#paper-management-card input[type="range"]::-webkit-slider-thumb {
-    width: 22px;
-    height: 22px;
-    background: #fff;
-    border: 2px solid var(--accent-color);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-}
-#paper-management-card input[type="range"]::-moz-range-thumb {
-    width: 22px;
-    height: 22px;
-    background: #fff;
-    border: 2px solid var(--accent-color);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-}
-
-
-.paper-document-view {
-    padding: 3rem 4rem;
-    box-shadow: 0 8px 32px var(--shadow-color);
-    border-radius: var(--border-radius-sm);
-}
-.paper-section {
-    margin-bottom: 3rem;
-}
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
-}
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-.title-block {
-    display: flex;
-    flex-direction: column;
-}
-h3.paper-section-title {
-    font-size: 1.6rem;
-    font-family: var(--font-serif);
-    font-weight: 500;
-    color: var(--text-color);
-    border: none;
-    padding: 0;
-    margin: 0;
-}
-.section-number {
-    margin-right: 0.5em;
+    flex-shrink: 0; width: 44px; height: 44px;
+    font-size: 1rem; padding: 0; border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-color); background-color: var(--card-bg);
     color: var(--text-muted);
 }
+#new-paper-btn { background-color: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+#new-paper-btn:hover { background-color: #082b40; }
+#rename-paper-btn:hover { background-color: var(--hover-bg-color); color: var(--primary-color); }
+#delete-paper-btn:hover { background-color: var(--danger-color); color: #fff; border-color: var(--danger-color); }
+#export-pdf-btn {
+    width: 100%; background-color: var(--success-color); color: white;
+    border: none;
+}
 
-.paper-section .content-display,
-.paper-section textarea {
-    font-size: 1rem;
-    line-height: 1.8;
-    padding: 0.75rem 1rem;
-    border-radius: var(--border-radius-sm);
-    transition: background-color 0.2s, border-color 0.2s;
+/* Document View */
+.paper-document-view {
+    max-width: 1100px;
+    margin: 3rem auto;
+    padding: 4rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
 }
-.paper-section .content-display:hover {
-    background-color: var(--hover-bg-color);
-    border-color: var(--border-color);
+
+.paper-section { margin-bottom: 3.5rem; }
+.section-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+.header-left { display: flex; align-items: flex-start; gap: 1rem; }
+.title-block { display: flex; flex-direction: column; }
+
+h3.paper-section-title {
+    font-size: 1.6rem; font-family: var(--font-serif); font-weight: 500;
+    color: var(--text-color); border: none; padding: 0; margin: 0;
+}
+.section-number { margin-right: 0.5em; color: var(--text-muted); }
+
+.paper-section .content-display, .paper-section textarea {
+    font-family: var(--font-serif); font-size: 1rem; line-height: 1.8;
+    padding: 0; border-radius: 0; transition: none;
+    background: transparent; border: none;
 }
 .paper-section textarea {
-    background-color: var(--hover-bg-color);
-    border-color: var(--accent-color);
-    resize: none;
-    overflow: hidden;
+    color: var(--text-color); resize: none; overflow: hidden;
 }
 .paper-section[data-status="locked"] .content-display { color: var(--locked-color); cursor: not-allowed; }
-.paper-section[data-status="locked"] .content-display:hover { background-color: transparent; }
+.content-display.is-placeholder .empty-placeholder { font-style: italic; color: var(--text-muted); }
 
-/* UNIFIED Placeholder Styling */
-.content-display.is-placeholder .empty-placeholder {
-    font-style: italic;
-    color: var(--text-muted);
+/* Section Specific Typography */
+#section-title .content-display:not(.is-placeholder), #section-title textarea {
+    font-weight: 700; font-size: 2.2rem; line-height: 1.3; text-align: center;
 }
-
-/* Content-Specific styles (applied ONLY when NOT a placeholder and to the corresponding textarea) */
-#section-title .content-display:not(.is-placeholder),
-#section-title textarea {
-    font-family: var(--font-serif);
-    font-weight: 700;
-    font-size: 2.2rem;
-    line-height: 1.3;
-    text-align: center;
-    padding-top: 0;
-    padding-bottom: 0;
-}
-#section-keywords .content-display:not(.is-placeholder),
-#section-keywords textarea {
+#section-keywords .content-display:not(.is-placeholder), #section-keywords textarea {
     font-style: italic;
 }
-
-/* UNIFIED Alignment & Indentation for all content sections */
-.paper-section .content-display:not(.is-placeholder),
-.paper-section textarea {
-    text-align: justify;
-    hyphens: auto;
-}
-.paper-section .content-display p {
+.paper-section .content-display p:not(:first-child) {
     text-indent: 2em; /* Paragraph first-line indent */
 }
-.paper-section textarea {
-    text-align: justify;
-}
 
-
-/* -- Redesigned Elegant Status Indicator -- */
+/* Status Indicator */
 .paper-section .status-indicator {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s var(--transition-curve);
-    flex-shrink: 0;
-    position: relative;
-    background-color: transparent;
+    width: 28px; height: 28px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; transition: all 0.3s var(--transition-curve);
+    flex-shrink: 0; position: relative; background-color: transparent;
 }
-.paper-section .status-indicator.locked {
-    border: 2px solid var(--locked-color);
-}
-.paper-section .status-indicator.locked i {
-    color: var(--locked-color);
-    font-size: 0.8em;
-}
-.paper-section .status-indicator.empty {
-    border: 2px dashed var(--empty-color);
-    animation: pulse-empty 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
-}
-@keyframes pulse-empty {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.3); }
-    50% { box-shadow: 0 0 0 6px rgba(74, 144, 226, 0); }
-}
+.paper-section .status-indicator.locked { border: 2px solid var(--locked-color); }
+.paper-section .status-indicator.locked i { color: var(--locked-color); font-size: 1em; }
+.paper-section .status-indicator.empty { border: 2px dashed var(--empty-color); }
 .paper-section .status-indicator.generating::before {
-    content: '';
-    position: absolute;
-    top: -3px; left: -3px; right: -3px; bottom: -3px;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    border-top-color: var(--accent-color);
+    content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
+    border-radius: 50%; border: 3px solid transparent; border-top-color: var(--primary-color);
     animation: spin 1s linear infinite;
 }
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 .paper-section .status-indicator.completed {
-    background-color: var(--success-color);
-    border: 2px solid var(--success-color);
+    background-color: var(--success-color); border: 2px solid var(--success-color);
 }
-.paper-section .status-indicator.completed i {
-    color: white;
-    font-size: 0.9em;
-}
+.paper-section .status-indicator.completed i { color: white; font-size: 1em; }
 
-/* -- Dependency Info Styles -- */
+/* Dependency Info */
 .dependencies-info {
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    font-size: 0.85rem; margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 8px;
 }
 .dep-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 4px; padding: 0.25rem 0.75rem;
+    border-radius: 999px; font-weight: 500;
 }
 .dep-item .icon { font-size: 0.8em; }
-.dep-item.completed { color: #1e8449; background-color: #d4efdf; }
+.dep-item.completed { color: #2A785A; background-color: #eaf6f1; }
 .dep-item.pending { color: #616a73; background-color: #e9ecef; }
 
-.section-controls {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
+/* Section Controls & Buttons */
+.section-controls { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.section-controls .btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
 
-/* --- [NEW] Refined Button Styles for Paper Writing Section --- */
-.section-controls .btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    border: 1px solid transparent; /* Base border for consistent sizing */
-    background-clip: padding-box;
-}
+.btn-edit { background-color: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
+.btn-edit:hover { background-color: rgba(11, 57, 84, 0.05); }
+.btn-save { background-color: var(--success-color); color: white; }
+.btn-cancel { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); }
+.btn-cancel:hover { background-color: var(--hover-bg-color); }
 
-/* Edit Button Style: Subtle, inviting outline */
-.btn-edit {
-    background-color: transparent;
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
-.btn-edit:hover, .btn-edit:focus {
-    background-color: rgba(74, 144, 226, 0.1); /* Soft blue highlight */
-    color: var(--accent-color); /* Ensure color stays */
-}
+.btn-modify { background-color: #c47600; color: white; }
+.btn-modify:hover { background-color: #a56400; }
+.btn-modify-annotated { background-color: #007399; color: white; }
+.btn-modify-annotated:hover { background-color: #005f7d; }
 
-/* Modify Button Style: Warm, constructive amber */
-.btn-modify {
-    background-color: #e67e22; /* Carrot Orange */
-    color: white;
-    border-color: #d35400; /* Darker border for depth */
-}
-.btn-modify:hover, .btn-modify:focus {
-    background-color: #d35400;
-    border-color: #d35400;
-    color: white;
-}
-
-/* Annotated Modify Button Style: Professional, clear blue */
-.btn-modify-annotated {
-    background-color: #2980b9; /* Belize Hole Blue */
-    color: white;
-    border-color: #2471a3;
-}
-.btn-modify-annotated:hover, .btn-modify-annotated:focus {
-    background-color: #2471a3;
-    border-color: #2471a3;
-    color: white;
-}
+.btn-expand { background-image: linear-gradient(45deg, #5D3A9B, #8A5FB2); color: white; border: none; }
+.btn-expand:hover { background-image: linear-gradient(45deg, #4C2E80, #734B9E); }
+.btn-polish { background-image: linear-gradient(45deg, #3A9B7A, #5FB299); color: white; border: none; }
+.btn-polish:hover { background-image: linear-gradient(45deg, #2E8063, #4B9E82); }
 
 
-/* Expand Button Style: Rich, creative purple gradient */
-.btn-expand {
-    background-image: linear-gradient(45deg, #8e44ad, #9b59b6);
-    color: white;
-    border: none;
-}
-.btn-expand:hover, .btn-expand:focus {
-    background-image: linear-gradient(45deg, #803a9b, #8a48a5);
-    color: white;
-}
-
-/* Polish Button Style: Fresh, refined teal gradient */
-.btn-polish {
-    background-image: linear-gradient(45deg, #16a085, #1abc9c);
-    color: white;
-    border: none;
-}
-.btn-polish:hover, .btn-polish:focus {
-    background-image: linear-gradient(45deg, #138d75, #17a589);
-    color: white;
-}
-/* --- End of Refined Button Styles --- */
-
-/* -- Idea Section Specifics -- */
 #idea-container .paper-section {
-    background-color: #fffde7;
-    border: 1px dashed #fdd835;
-    border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
+    background-color: #fdfaf0; border: 1px dashed #e6c887;
+    border-radius: var(--border-radius-md); padding: 2rem;
 }
-#idea-container h3 { color: #827717; }
-#idea-container textarea { font-size: 1rem; line-height: 1.8; text-align: left; hyphens: none; } /* Idea section is a scratchpad, no need for justify */
+#idea-container h3 { color: #8c6d31; }
+#idea-container textarea { font-size: 1rem; line-height: 1.8; }
 
-/* -- Global Prompt Bar for Paper Writing -- */
 #prompt-bar { padding: 1rem 2.5rem; }
-#prompt-bar textarea { height: 50px; border-radius: var(--border-radius-md); }
+#prompt-bar textarea { border-radius: var(--border-radius-md); border: 1px solid #ccc; padding: 0.75rem 1rem; }
+#prompt-bar textarea:focus { border: 1px solid var(--primary-color); }
 
-/**
- * ========================================================================
- * Refined Modal Styles (Diff & Annotation)
- * ========================================================================
- */
+/* Modal Styles */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(9, 30, 66, 0.5); /* A more professional overlay color */
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(9, 30, 66, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    display: flex; justify-content: center; align-items: center; z-index: 2000;
+    opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
 }
-
-.modal-overlay.visible {
-    opacity: 1;
-    visibility: visible;
-}
-
+.modal-overlay.visible { opacity: 1; visibility: visible; }
 .modal-content {
-    background-color: var(--card-bg);
-    padding: 2rem;
-    border-radius: var(--border-radius-lg);
-    width: 90%;
-    max-width: 1400px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 16px 40px rgba(58, 80, 107, 0.2);
-    transform: scale(0.95);
+    background-color: var(--card-bg); padding: 2rem; border-radius: var(--border-radius-lg);
+    width: 90%; max-width: 1400px; max-height: 90vh; display: flex; flex-direction: column;
+    box-shadow: 0 16px 40px rgba(58, 80, 107, 0.2); transform: scale(0.95);
     transition: transform 0.3s var(--transition-curve);
-    border: 1px solid rgba(255,255,255,0.2);
 }
-
-.modal-overlay.visible .modal-content {
-    transform: scale(1);
-}
-
+.modal-overlay.visible .modal-content { transform: scale(1); }
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;
 }
-
-.modal-header h2 {
-    border: none;
-    margin: 0;
-    padding: 0;
-    font-size: 1.5rem;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    color: var(--text-muted);
-    line-height: 1;
-}
-
-.modal-body {
-    overflow: hidden;
-    flex-grow: 1;
-    display: flex;
-    gap: 1rem;
-}
-
-.diff-pane {
-    flex: 1;
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-md);
-    background-color: var(--card-bg);
-    position: relative;
-}
-
+.modal-header h2 { border: none; margin: 0; padding: 0; font-size: 1.5rem; }
+.close-btn { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted); line-height: 1; }
+.modal-body { overflow: hidden; flex-grow: 1; display: flex; gap: 1rem; }
+.diff-pane { flex: 1; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--border-radius-md); background-color: var(--card-bg); position: relative; }
 .pane-header {
-    position: sticky;
-    top: 0;
-    background: var(--hover-bg-color);
-    padding: 0.75rem 1rem;
-    font-weight: bold;
-    border-bottom: 1px solid var(--border-color);
-    z-index: 10;
+    position: sticky; top: 0; background: #f9f9f9; padding: 0.75rem 1rem; font-weight: bold; border-bottom: 1px solid var(--border-color); z-index: 10;
 }
-
-#diff-output {
-    display: flex;
-    width: 100%;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    line-height: 1.6;
-}
-
-#diff-output-old, #diff-output-new {
-    flex: 1 1 50%;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-.diff-line {
-    display: flex;
-    width: 100%;
-    min-height: 24px;
-    padding: 2px 0;
-}
+#diff-output { display: flex; width: 100%; font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; }
+#diff-output-old, #diff-output-new { flex: 1 1 50%; white-space: pre-wrap; word-break: break-word; }
+.diff-line { display: flex; width: 100%; min-height: 24px; padding: 2px 0; }
 .diff-line.context { background-color: transparent; }
-.diff-line.added { background-color: rgba(46, 160, 67, 0.15); }
-.diff-line.removed { background-color: rgba(248, 81, 73, 0.1); }
+.diff-line.added { background-color: rgba(42, 120, 90, 0.1); }
+.diff-line.removed { background-color: rgba(164, 56, 32, 0.1); }
 .diff-line.empty { background-color: #f7f9fc; }
-
 .line-number {
-    flex-shrink: 0;
-    user-select: none;
-    width: 45px;
-    padding-right: 10px;
-    text-align: right;
-    color: var(--text-muted);
-    background-color: var(--hover-bg-color);
-    border-right: 1px solid var(--border-color);
+    flex-shrink: 0; user-select: none; width: 45px; padding-right: 10px; text-align: right;
+    color: var(--text-muted); background-color: #f7f9f9; border-right: 1px solid var(--border-color);
 }
-
-.line-content {
-    padding-left: 15px;
-    flex-grow: 1;
-}
-
-.diff-line ins, .diff-line del {
-    text-decoration: none;
-    border-radius: 3px;
-}
-.diff-line.added ins { background-color: rgba(46, 160, 67, 0.3); }
-.diff-line.removed del { background-color: rgba(248, 81, 73, 0.2); }
-
-
+.line-content { padding-left: 15px; flex-grow: 1; }
+.diff-line ins, .diff-line del { text-decoration: none; border-radius: 3px; }
+.diff-line.added ins { background-color: rgba(42, 120, 90, 0.2); }
+.diff-line.removed del { background-color: rgba(164, 56, 32, 0.2); }
 .modal-footer {
-    padding-top: 1.5rem;
-    margin-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
+    padding-top: 1.5rem; margin-top: 1.5rem; border-top: 1px solid var(--border-color);
+    display: flex; justify-content: flex-end; gap: 1rem;
 }
 
-/**
- * 样式：用于批注功能的核心组件。
- */
+/* Annotation Styles */
 .annotated-text {
-    background-color: rgba(255, 236, 179, 0.6);
-    border-bottom: 2px dotted #FFB74D;
-    padding: 0 2px;
-    margin: 0 1px;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    background-color: rgba(255, 236, 179, 0.6); border-bottom: 2px dotted #FFB74D;
+    padding: 0 2px; margin: 0 1px; border-radius: 2px; cursor: pointer; transition: background-color 0.2s ease;
 }
-.annotated-text:hover {
-    background-color: rgba(255, 236, 179, 1);
-}
-
+.annotated-text:hover { background-color: rgba(255, 236, 179, 1); }
 .annotation-popover {
-    position: absolute;
-    background-color: var(--card-bg);
-    border: none;
-    border-radius: var(--border-radius-md);
-    box-shadow: 0 8px 24px rgba(58, 80, 107, 0.15), 0 2px 6px rgba(58, 80, 107, 0.1);
-    z-index: 1100;
-    width: 280px;
-    opacity: 0;
-    transform: translateY(5px) scale(0.95);
-    transition: transform 0.15s ease-out, opacity 0.15s ease-out;
-    transform-origin: top left;
-    display: none;
+    position: absolute; background-color: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md); box-shadow: 0 8px 24px rgba(58, 80, 107, 0.1);
+    z-index: 1100; width: 280px; opacity: 0; transform: translateY(5px) scale(0.95);
+    transition: transform 0.15s ease-out, opacity 0.15s ease-out; transform-origin: top left; display: none;
 }
-.annotation-popover.visible {
-    display: block;
-    opacity: 1;
-    transform: translateY(0) scale(1);
-}
-
-.annotation-popover-content {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: var(--text-color);
-    padding: 1rem;
-    padding-bottom: 0.75rem;
-    max-height: 150px;
-    overflow-y: auto;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.annotation-popover-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background-color: var(--hover-bg-color);
-}
-
-.annotation-popover-actions .btn {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.8rem;
-    box-shadow: none;
-}
-.annotation-popover-actions .btn:hover {
-    transform: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-
-/**
- * 样式：用于输入批注内容的模态框 (Refined)。
- */
+.annotation-popover.visible { display: block; opacity: 1; transform: translateY(0) scale(1); }
+.annotation-popover-content { font-size: 0.9rem; line-height: 1.6; color: var(--text-color); padding: 1rem; padding-bottom: 0.75rem; max-height: 150px; overflow-y: auto; border-bottom: 1px solid var(--border-color); }
+.annotation-popover-actions { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0.75rem 1rem; background-color: var(--hover-bg-color); }
+.annotation-popover-actions .btn { padding: 0.25rem 0.75rem; font-size: 0.8rem; box-shadow: none; }
 .annotation-modal-content {
-    background-color: var(--card-bg);
-    padding: 1.75rem;
-    border-radius: var(--border-radius-lg);
-    width: 90%;
-    max-width: 480px;
-    box-shadow: 0 16px 40px rgba(58, 80, 107, 0.2);
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+    background-color: var(--card-bg); padding: 1.75rem; border-radius: var(--border-radius-lg); width: 90%;
+    max-width: 480px; box-shadow: 0 16px 40px rgba(58, 80, 107, 0.2);
+    display: flex; flex-direction: column; gap: 1.25rem;
 }
-.annotation-modal-content h4 {
-    font-family: var(--font-serif);
-    font-weight: 500;
-    color: var(--primary-color);
-    margin: 0;
-    padding: 0;
-    border: none;
-    font-size: 1.25rem;
-}
-#annotation-input {
-    min-height: 100px;
-    resize: vertical;
-    background-color: var(--bg-color);
-}
-/* Refined annotation modal footer buttons */
-.annotation-modal-content .modal-footer {
-    border: none; padding: 0; margin: 0;
-}
-#cancel-annotation-btn {
-    background-color: transparent;
-    color: var(--text-muted);
-    box-shadow: none;
-    border: 1px solid var(--border-color);
-}
-#cancel-annotation-btn:hover {
-    background-color: var(--hover-bg-color);
-    border-color: #ced4da;
-}
-#save-annotation-btn {
-    background-color: var(--accent-color);
-}
+.annotation-modal-content h4 { font-family: var(--font-serif); font-weight: 500; color: var(--primary-color); margin: 0; padding: 0; border: none; font-size: 1.25rem; }
+#annotation-input { min-height: 100px; resize: vertical; background-color: var(--bg-color); padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--border-radius-md); }
+#annotation-input:focus { border-color: var(--primary-color); }
+.annotation-modal-content .modal-footer { border: none; padding: 0; margin: 0; }
+#save-annotation-btn { background-color: var(--primary-color); color: white; }
+#cancel-annotation-btn { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); }
 
-
-/**
- * 样式：用于编辑模式下的浮动工具栏 (Refined)。
- * 提升了按钮的视觉质感，包括渐变背景、更柔和的阴影和精致的交互动画。
- */
+/* Floating Toolbar */
 #floating-editor-toolbar {
-    position: fixed;
-    z-index: 1050;
-    display: none;
-    opacity: 0;
+    position: fixed; z-index: 1050; display: none; opacity: 0;
     transform: scale(0.9);
     transition: opacity 0.2s var(--transition-curve), transform 0.2s var(--transition-curve), top 0.1s ease-out, left 0.1s ease-out;
 }
-
-#floating-editor-toolbar.visible {
-    display: block;
-    opacity: 1;
-    transform: scale(1);
-}
-
+#floating-editor-toolbar.visible { display: block; opacity: 1; transform: scale(1); }
 #floating-editor-toolbar .btn-toolbar {
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-    background-image: linear-gradient(45deg, #4a90e2, #5a9ee4);
-    color: white;
-    border: 1px solid rgba(255,255,255,0.3);
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 16px rgba(74, 144, 226, 0.3);
-    cursor: pointer;
+    width: 44px; height: 44px; padding: 0; border-radius: 50%;
+    background-image: linear-gradient(45deg, var(--accent-color), #d4a637);
+    color: white; border: none;
+    font-size: 1.25rem; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 16px rgba(184, 134, 11, 0.3); cursor: pointer;
     transition: all 0.2s var(--transition-curve);
 }
-
 #floating-editor-toolbar .btn-toolbar:hover {
     transform: scale(1.1);
-    box-shadow: 0 8px 24px rgba(74, 144, 226, 0.4);
-}
-#floating-editor-toolbar .btn-toolbar:active {
-    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(184, 134, 11, 0.4);
 }
 
 
-/*
- * ==========================================================================
- * -- Print-specific styles for Professional PDF Export --
- * ==========================================================================
- */
+/* Print Styles */
 @media print {
-    body, .container {
-        display: block;
-        background-color: #fff;
-    }
+    body, .container { display: block; background-color: #fff; }
     .sidebar, .page-header, .controls-card, .section-controls, #prompt-bar, .modal-overlay, #floating-editor-toolbar, .annotation-popover {
         display: none !important;
     }
-    .annotated-text {
-        background-color: transparent;
-        border-bottom: none;
-        padding: 0;
-        margin: 0;
-        border-radius: 0;
-    }
-    .main-content {
-        padding: 0;
-        overflow: visible;
-    }
-    .paper-document-view {
-        box-shadow: none;
-        border: none;
-        padding: 0;
-    }
-    .paper-section {
-        page-break-inside: avoid;
-    }
-    h3.paper-section-title {
-        page-break-after: avoid;
-        page-break-before: auto;
-    }
-    .paper-section .content-display, .paper-section textarea {
-        color: #000;
-    }
-    @page {
-        margin: 2cm;
-    }
+    .annotated-text { background-color: transparent; border-bottom: none; padding: 0; margin: 0; border-radius: 0; }
+    .main-content { padding: 0; overflow: visible; }
+    .paper-document-view { box-shadow: none; border: none; padding: 0; max-width: 100%; }
+    .paper-section { page-break-inside: avoid; }
+    h3.paper-section-title { page-break-after: avoid; page-break-before: auto; }
+    .paper-section .content-display, .paper-section textarea { color: #000; }
+    .paper-section .content-display p { text-indent: 2em; }
+    @page { margin: 2cm; }
 }

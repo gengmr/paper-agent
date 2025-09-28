@@ -166,7 +166,7 @@ function initSingleAnalysisPage() {
             li.dataset.filename = paper.filename;
             const statusClass = paper.processed ? 'status-processed' : 'status-pending';
             const statusText = paper.processed ? '已处理' : '待处理';
-            li.innerHTML = `<span><i class="fas fa-file-pdf"></i> ${paper.filename}</span><span class="status-indicator ${statusClass}">${statusText}</span>`;
+            li.innerHTML = `<span><i class="ph ph-file-pdf"></i> ${paper.filename}</span><span class="status-indicator ${statusClass}">${statusText}</span>`;
             ul.appendChild(li);
         });
         paperListContainer.innerHTML = '';
@@ -589,7 +589,7 @@ function initPaperWritingPage() {
             const statusIndicator = sectionEl.querySelector('.status-indicator');
             if (statusIndicator) {
                 statusIndicator.className = `status-indicator ${sectionData.status}`;
-                statusIndicator.innerHTML = { 'locked': '<i class="fas fa-lock"></i>', 'completed': '<i class="fas fa-check"></i>', 'empty': '', 'generating': '' }[sectionData.status] || '';
+                statusIndicator.innerHTML = { 'locked': '<i class="ph ph-lock-simple"></i>', 'completed': '<i class="ph ph-check"></i>', 'empty': '', 'generating': '' }[sectionData.status] || '';
             }
 
             const depInfo = sectionEl.querySelector('.dependencies-info');
@@ -598,7 +598,7 @@ function initPaperWritingPage() {
                     const depConfig = paperStructureMap[depKey];
                     const depName = depConfig ? depConfig.name : depKey;
                     const isCompleted = paperState[depKey]?.status === 'completed';
-                    const icon = isCompleted ? '<i class="fas fa-check-circle icon"></i>' : '<i class="fas fa-times-circle icon"></i>';
+                    const icon = isCompleted ? '<i class="ph ph-check-circle icon"></i>' : '<i class="ph ph-x-circle icon"></i>';
                     return `<span class="dep-item ${isCompleted ? 'completed' : 'pending'}">${icon} ${depName}</span>`;
                 }).join(' ') || '无依赖';
             }
@@ -651,9 +651,9 @@ function initPaperWritingPage() {
             const titleNumber = sectionConfig.numbered ? `<span class="section-number">${numberedSectionCounter++}.</span>` : '';
             const titleHTML = `<h3 class="paper-section-title">${titleNumber}${sectionConfig.name}</h3>`;
             const sectionControlsHTML = `
-                <button class="btn btn-secondary btn-edit" data-section="${key}">编辑</button>
-                <button class="btn btn-success btn-save" data-section="${key}" style="display:none;">保存</button>
-                <button class="btn btn-secondary btn-cancel" data-section="${key}" style="display:none;">取消</button>
+                <button class="btn btn-edit" data-section="${key}">编辑</button>
+                <button class="btn btn-save" data-section="${key}" style="display:none;">保存</button>
+                <button class="btn btn-cancel" data-section="${key}" style="display:none;">取消</button>
                 <button class="btn btn-primary btn-generate" data-section="${key}" style="display:none;">生成</button>
                 <button class="btn btn-modify" data-section="${key}" style="display:none;">修改</button>
                 <button class="btn btn-modify-annotated" data-section="${key}" style="display:none;">批注修改</button>
@@ -663,7 +663,7 @@ function initPaperWritingPage() {
             const sectionHTML = `<div class="paper-section" data-key="${key}" id="section-${key}">
                 <div class="section-header">
                     <div class="header-left">
-                        <div class="status-indicator locked"><i class="fas fa-lock"></i></div>
+                        <div class="status-indicator locked"><i class="ph ph-lock-simple"></i></div>
                         <div class="title-block">
                             ${titleHTML}
                             ${sectionConfig.dependencies.length > 0 ? '<div class="dependencies-info"></div>' : ''}
@@ -686,7 +686,7 @@ function initPaperWritingPage() {
     function createFloatingToolbar() {
         floatingToolbar = document.createElement('div');
         floatingToolbar.id = 'floating-editor-toolbar';
-        floatingToolbar.innerHTML = `<button class="btn btn-toolbar btn-add-annotation" title="添加批注"><i class="fas fa-highlighter"></i></button>`;
+        floatingToolbar.innerHTML = `<button class="btn btn-toolbar btn-add-annotation" title="添加批注"><i class="ph ph-pen-nib"></i></button>`;
         document.body.appendChild(floatingToolbar);
 
         floatingToolbar.querySelector('.btn-add-annotation').addEventListener('click', () => {

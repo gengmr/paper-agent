@@ -1,0 +1,44 @@
+{
+    "abstract": {
+        "content": "",
+        "status": "locked"
+    },
+    "background": {
+        "content": "",
+        "status": "locked"
+    },
+    "conclusion": {
+        "content": "",
+        "status": "locked"
+    },
+    "discussion": {
+        "content": "",
+        "status": "locked"
+    },
+    "documentName": "未命名论文 1",
+    "id": "未命名论文 1",
+    "idea": {
+        "content": "这是",
+        "status": "empty"
+    },
+    "introduction": {
+        "content": "",
+        "status": "locked"
+    },
+    "keywords": {
+        "content": "",
+        "status": "locked"
+    },
+    "methods": {
+        "content": "",
+        "status": "locked"
+    },
+    "results": {
+        "content": "",
+        "status": "locked"
+    },
+    "title": {
+        "content": "",
+        "status": "locked"
+    }
+}
