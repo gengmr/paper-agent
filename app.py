@@ -242,9 +242,11 @@ def rename_paper(old_paper_name):
 
 @app.route('/api/paper/generate', methods=['POST'])
 def generate_paper_section():
-    """API: 为论文的特定部分生成、修改、扩写或润色内容。"""
+    """
+    API: 为论文的特定部分生成或修改内容。
+    支持多种操作类型，包括初次生成、基于全局指令的修改、基于内联标注的修改、扩写和润色。
+    """
     data = request.json
-    # ... (此函数的核心逻辑未改变，因为它操作的是前端发送的paper_data，是无状态的) ...
     api_key, model, temperature_str, language, target_section, paper_data, action_type = \
         data.get('apiKey'), data.get('model'), data.get('temperature'), data.get('language'), \
             data.get('target_section'), data.get('paper_data'), data.get('action_type')
@@ -277,21 +279,30 @@ def generate_paper_section():
             prompt_parts.append(PROMPTS['paper_section_context_header'].format(context_string=context_string))
 
         display_target_name = section_names.get(target_section, target_section.capitalize())
-        action_map = {'generate': 'paper_section_instruction_generate', 'modify': 'paper_section_instruction_modify',
-                      'expand': 'paper_section_instruction_expand', 'polish': 'paper_section_instruction_polish'}
+        action_map = {'generate': 'paper_section_instruction_generate',
+                      'modify': 'paper_section_instruction_modify',
+                      'modify_annotated': 'paper_section_instruction_modify_annotated',
+                      'expand': 'paper_section_instruction_expand',
+                      'polish': 'paper_section_instruction_polish'}
         prompt_key = action_map.get(action_type)
         if not prompt_key: return jsonify({"status": "error", "message": f"无效的 action_type: {action_type}"}), 400
 
         prompt_template = PROMPTS[prompt_key]
+        current_content = paper_data.get(target_section, {}).get('content', '')
+
         if action_type == 'generate':
             instruction = prompt_template.format(language=language, target_name=display_target_name)
         elif action_type == 'modify':
             instruction = prompt_template.format(target_name=display_target_name,
-                                                 current_content=paper_data[target_section]['content'],
+                                                 current_content=current_content,
                                                  language=language, user_prompt=user_prompt)
-        else:
+        elif action_type == 'modify_annotated':
             instruction = prompt_template.format(target_name=display_target_name,
-                                                 current_content=paper_data[target_section]['content'],
+                                                 current_content=current_content,
+                                                 language=language)
+        else:  # expand, polish
+            instruction = prompt_template.format(target_name=display_target_name,
+                                                 current_content=current_content,
                                                  language=language)
 
         prompt_parts.append(instruction)

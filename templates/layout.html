@@ -16,20 +16,17 @@
     <script>
       /**
        * MathJax 全局配置对象。
-       * 此配置确保 MathJax 能正确识别并处理行内 ($...$) 和行间 ($$...) 公式，
-       * 同时优化渲染性能和避免与页面其他元素的冲突。
        */
       MathJax = {
         tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']], // 定义行内公式分隔符
-          displayMath: [['$$', '$$'], ['\\[', '\\]']], // 定义行间公式分隔符
-          processEscapes: true // 处理 \$, 等转义字符
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true
         },
         svg: {
-          fontCache: 'global' // 使用全局字体缓存以提高渲染速度
+          fontCache: 'global'
         },
         options: {
-          // 忽略特定HTML标签内的数学公式处理，防止冲突
           skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
         }
       };
@@ -38,7 +35,7 @@
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
     </script>
 
-    <!-- diff.js: 一个强大的文本差异对比库，用于在“修改”功能中高亮显示新旧内容的区别 -->
+    <!-- diff.js: 一个强大的文本差异对比库 -->
     <script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
 </head>
 <body>
@@ -86,6 +83,19 @@
             </div>
         </div>
     </div>
+
+    <!-- 全局模态框：用于输入和编辑批注内容 -->
+    <div id="annotation-modal" class="modal-overlay">
+        <div class="annotation-modal-content">
+            <h4>添加/修改批注</h4>
+            <textarea id="annotation-input" placeholder="请输入修改意见..."></textarea>
+            <div class="modal-footer">
+                <button id="cancel-annotation-btn" class="btn btn-secondary">取消</button>
+                <button id="save-annotation-btn" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- 主 JavaScript 文件 -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

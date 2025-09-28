@@ -286,7 +286,7 @@ input[type="range"]::-moz-range-thumb {
 .status-message.success { color: var(--success-color); }
 .status-message.error { color: var(--error-color); }
 
-.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-expand, .btn-polish, .btn-edit, .btn-modify {
+.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-expand, .btn-polish, .btn-edit, .btn-modify, .btn-modify-annotated {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: var(--border-radius-md);
@@ -430,72 +430,153 @@ body:has(.sidebar:hover) .modification-bar {
 
 /* --- Paper Writing Page Specific Styles --- */
 
-/* -- Redesigned Management Card -- */
+/**
+ * ========================================================================
+ * Refined Management Card Styles
+ *
+ * 此区域的样式经过全面优化，以提升“文章管理与工具”和“AI全局设置”
+ * 面板的视觉精致度和用户体验。
+ * ========================================================================
+ */
 #paper-management-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2.5rem;
+    gap: 2rem 2.5rem;
     align-items: start;
     padding: 2.5rem;
+    background-color: var(--card-bg);
 }
 
 @media (max-width: 992px) {
-    #paper-management-card {
-        grid-template-columns: 1fr;
-    }
+    #paper-management-card { grid-template-columns: 1fr; }
 }
 
 #paper-management-card .card-section {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    height: 100%;
+    gap: 1.5rem; /* 统一组内间距 */
 }
 
 #paper-management-card .section-title {
     font-family: var(--font-serif);
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 500;
     color: var(--primary-color);
     margin: 0 0 0.5rem 0;
-    padding: 0 0 0.75rem 0;
+    padding: 0;
     border: none;
-    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
-#paper-management-card h3 { border: none; } /* Override generic h3 style */
 
+#paper-management-card h3 { border: none; }
 
 #paper-management-card .control-group {
     margin: 0;
 }
-/* Push the last control group to the bottom of the flex container */
-#paper-management-card .card-section .control-group:last-child {
-    margin-top: auto;
-    padding-top: 1.5rem;
+
+#paper-management-card label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase; /* 标签大写，增加设计感 */
+    letter-spacing: 0.5px;
 }
 
+/* 统一定制输入框和下拉选择框的样式 */
+#paper-management-card select,
+#paper-management-card input[type="text"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    background-color: var(--bg-color); /* 使用比白色稍深的背景 */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    transition: all 0.2s var(--transition-curve);
+}
 
+/* 为下拉选择框添加自定义的箭头图标 */
+#paper-management-card select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem; /* 为箭头腾出空间 */
+}
+
+#paper-management-card select:focus,
+#paper-management-card input[type="text"]:focus {
+    background-color: var(--card-bg);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+/* 优化带按钮的输入框组 */
 .input-with-button {
     display: flex;
     gap: 0.5rem;
 }
 
-.input-with-button > * {
+.input-with-button > *:first-child {
     flex-grow: 1;
 }
 
-.input-with-button .btn {
-    flex-grow: 0;
-    padding-left: 1rem;
-    padding-right: 1rem;
+/* 优化图标按钮样式 */
+#new-paper-btn, #rename-paper-btn, #delete-paper-btn {
+    flex-shrink: 0;
+    width: 42px; /* 统一尺寸 */
+    height: 42px;
+    font-size: 1rem;
+    padding: 0;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+}
+#new-paper-btn { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+#new-paper-btn:hover { background-color: #3b82e0; }
+#rename-paper-btn { color: var(--text-muted); }
+#rename-paper-btn:hover { background-color: var(--hover-bg-color); color: var(--primary-color); }
+#delete-paper-btn { color: var(--text-muted); }
+#delete-paper-btn:hover { background-color: var(--danger-color); color: #fff; border-color: var(--danger-color); }
+
+/* 优化导出按钮 */
+#export-pdf-btn {
+    width: 100%;
+    background-image: linear-gradient(45deg, var(--success-color), #27ae60);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(30, 132, 73, 0.2);
+}
+#export-pdf-btn:hover {
+    background-image: linear-gradient(45deg, #196f3d, #229954);
+    box-shadow: 0 6px 15px rgba(30, 132, 73, 0.3);
 }
 
-#rename-paper-btn, #delete-paper-btn {
-    min-width: 44px;
-    flex-grow: 0;
+/* 优化滑块（Temperature）样式 */
+#paper-management-card input[type="range"] {
+    height: 6px;
+    background: linear-gradient(90deg, var(--accent-color) 0%, #a2c6f0 100%);
+    border-radius: 3px;
+    padding: 0;
+}
+#paper-management-card input[type="range"]::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+#paper-management-card input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
 }
 
 
@@ -699,6 +780,19 @@ h3.paper-section-title {
     color: white;
 }
 
+/* Annotated Modify Button Style: Professional, clear blue */
+.btn-modify-annotated {
+    background-color: #2980b9; /* Belize Hole Blue */
+    color: white;
+    border-color: #2471a3;
+}
+.btn-modify-annotated:hover, .btn-modify-annotated:focus {
+    background-color: #2471a3;
+    border-color: #2471a3;
+    color: white;
+}
+
+
 /* Expand Button Style: Rich, creative purple gradient */
 .btn-expand {
     background-image: linear-gradient(45deg, #8e44ad, #9b59b6);
@@ -736,14 +830,20 @@ h3.paper-section-title {
 #prompt-bar { padding: 1rem 2.5rem; }
 #prompt-bar textarea { height: 50px; border-radius: var(--border-radius-md); }
 
-/* -- Diff Modal Styles (Side-by-Side View) -- */
+/**
+ * ========================================================================
+ * Refined Modal Styles (Diff & Annotation)
+ * ========================================================================
+ */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(9, 30, 66, 0.5); /* A more professional overlay color */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -763,13 +863,14 @@ h3.paper-section-title {
     padding: 2rem;
     border-radius: var(--border-radius-lg);
     width: 90%;
-    max-width: 1400px; /* Wider for side-by-side view */
+    max-width: 1400px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 16px 40px rgba(58, 80, 107, 0.2);
     transform: scale(0.95);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s var(--transition-curve);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .modal-overlay.visible .modal-content {
@@ -802,15 +903,15 @@ h3.paper-section-title {
 }
 
 .modal-body {
-    overflow: hidden; /* Hide main scrollbar */
+    overflow: hidden;
     flex-grow: 1;
     display: flex;
-    gap: 1rem; /* Space between panes */
+    gap: 1rem;
 }
 
 .diff-pane {
     flex: 1;
-    overflow-y: auto; /* Each pane scrolls independently */
+    overflow-y: auto;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-md);
     background-color: var(--card-bg);
@@ -844,7 +945,7 @@ h3.paper-section-title {
 .diff-line {
     display: flex;
     width: 100%;
-    min-height: 24px; /* Ensure empty lines are aligned */
+    min-height: 24px;
     padding: 2px 0;
 }
 .diff-line.context { background-color: transparent; }
@@ -885,53 +986,203 @@ h3.paper-section-title {
     gap: 1rem;
 }
 
+/**
+ * 样式：用于批注功能的核心组件。
+ */
+.annotated-text {
+    background-color: rgba(255, 236, 179, 0.6);
+    border-bottom: 2px dotted #FFB74D;
+    padding: 0 2px;
+    margin: 0 1px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.annotated-text:hover {
+    background-color: rgba(255, 236, 179, 1);
+}
+
+.annotation-popover {
+    position: absolute;
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 8px 24px rgba(58, 80, 107, 0.15), 0 2px 6px rgba(58, 80, 107, 0.1);
+    z-index: 1100;
+    width: 280px;
+    opacity: 0;
+    transform: translateY(5px) scale(0.95);
+    transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+    transform-origin: top left;
+    display: none;
+}
+.annotation-popover.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.annotation-popover-content {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-color);
+    padding: 1rem;
+    padding-bottom: 0.75rem;
+    max-height: 150px;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.annotation-popover-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--hover-bg-color);
+}
+
+.annotation-popover-actions .btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    box-shadow: none;
+}
+.annotation-popover-actions .btn:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+/**
+ * 样式：用于输入批注内容的模态框 (Refined)。
+ */
+.annotation-modal-content {
+    background-color: var(--card-bg);
+    padding: 1.75rem;
+    border-radius: var(--border-radius-lg);
+    width: 90%;
+    max-width: 480px;
+    box-shadow: 0 16px 40px rgba(58, 80, 107, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+.annotation-modal-content h4 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    color: var(--primary-color);
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 1.25rem;
+}
+#annotation-input {
+    min-height: 100px;
+    resize: vertical;
+    background-color: var(--bg-color);
+}
+/* Refined annotation modal footer buttons */
+.annotation-modal-content .modal-footer {
+    border: none; padding: 0; margin: 0;
+}
+#cancel-annotation-btn {
+    background-color: transparent;
+    color: var(--text-muted);
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+}
+#cancel-annotation-btn:hover {
+    background-color: var(--hover-bg-color);
+    border-color: #ced4da;
+}
+#save-annotation-btn {
+    background-color: var(--accent-color);
+}
+
+
+/**
+ * 样式：用于编辑模式下的浮动工具栏 (Refined)。
+ * 提升了按钮的视觉质感，包括渐变背景、更柔和的阴影和精致的交互动画。
+ */
+#floating-editor-toolbar {
+    position: fixed;
+    z-index: 1050;
+    display: none;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.2s var(--transition-curve), transform 0.2s var(--transition-curve), top 0.1s ease-out, left 0.1s ease-out;
+}
+
+#floating-editor-toolbar.visible {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+}
+
+#floating-editor-toolbar .btn-toolbar {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background-image: linear-gradient(45deg, #4a90e2, #5a9ee4);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(74, 144, 226, 0.3);
+    cursor: pointer;
+    transition: all 0.2s var(--transition-curve);
+}
+
+#floating-editor-toolbar .btn-toolbar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 24px rgba(74, 144, 226, 0.4);
+}
+#floating-editor-toolbar .btn-toolbar:active {
+    transform: scale(1.05);
+}
+
+
 /*
  * ==========================================================================
  * -- Print-specific styles for Professional PDF Export --
  * ==========================================================================
- * 这部分样式仅在用户触发打印或“导出为PDF”功能时生效。
- * 它的核心目标是：
- * 1.  **清理界面**: 隐藏所有非内容的UI元素，如侧边栏、按钮、设置卡片等。
- * 2.  **优化布局**: 将论文内容重置为适合A4纸张的布局，移除不必要的边距和阴影。
- * 3.  **控制分页**: 智能地控制分页行为，避免章节标题和内容被切断。
- * 4.  **设置页面属性**: 通过 `@page` 规则定义标准的打印边距。
- *
- * 最终效果是生成一份干净、专业、格式规范的学术文档PDF。
  */
 @media print {
     body, .container {
-        display: block; /* 覆盖 flex 布局，使内容自然流动 */
-        background-color: #fff; /* 打印背景通常为白色 */
+        display: block;
+        background-color: #fff;
     }
-    /* 隐藏所有与论文内容无关的界面元素 */
-    .sidebar, .page-header, .controls-card, .section-controls, #prompt-bar, .modal-overlay {
+    .sidebar, .page-header, .controls-card, .section-controls, #prompt-bar, .modal-overlay, #floating-editor-toolbar, .annotation-popover {
         display: none !important;
     }
-    /* 重置主内容区的样式以适应打印 */
+    .annotated-text {
+        background-color: transparent;
+        border-bottom: none;
+        padding: 0;
+        margin: 0;
+        border-radius: 0;
+    }
     .main-content {
         padding: 0;
-        overflow: visible; /* 确保所有内容都能被打印 */
+        overflow: visible;
     }
-    /* 移除论文视图的视觉效果，使其成为纯粹的内容容器 */
     .paper-document-view {
         box-shadow: none;
         border: none;
         padding: 0;
     }
-    /* 尝试避免在单个论文章节内部强制分页，保持内容完整性 */
     .paper-section {
         page-break-inside: avoid;
     }
-    /* 优化分页：章节标题后不应立即分页，新章节可视情况另起一页 */
     h3.paper-section-title {
         page-break-after: avoid;
         page-break-before: auto;
     }
-    /* 确保文本在打印时是黑色，以获得最佳对比度 */
     .paper-section .content-display, .paper-section textarea {
         color: #000;
     }
-    /* 定义打印页面的边距，2cm符合多数学术规范 */
     @page {
         margin: 2cm;
     }

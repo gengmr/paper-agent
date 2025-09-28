@@ -8,6 +8,7 @@
   "paper_section_context_header": "\n请基于以下背景信息：\n{context_string}",
   "paper_section_instruction_generate": "\n请根据以上背景信息，为论文用{language}撰写【{target_name}】部分。请确保内容专业、详尽、逻辑清晰。",
   "paper_section_instruction_modify": "\n当前【{target_name}】部分的内容如下：\n{current_content}\n\n请根据以上所有信息和用户的修改指令，用{language}优化并重写【{target_name}】部分。\n\n【用户指令】:\n{user_prompt}",
+  "paper_section_instruction_modify_annotated": "\n当前【{target_name}】部分的内容如下。其中包含了用 `{{被批注的原文}}【修改意见：...】` 格式标注的具体修改指令。\n\n你的任务是：作为一名专业的学术编辑，请严格遵循每一条“修改意见”，对相应的“被批注的原文”进行修改，并将修改后的结果平滑地融入上下文。请确保最终输出的文本是干净、完整、且不包含任何 `{{...}}` 或 `【...】` 标记的最终版本。\n\n--- 待修改内容 ---\n{current_content}",
   "paper_section_instruction_expand": "\n当前【{target_name}】部分的内容如下：\n{current_content}\n\n请根据以上所有信息，用{language}对【{target_name}】部分进行扩写。要求：在不改变核心观点和逻辑结构的前提下，丰富细节、增加支撑论据或深化解释，使内容更加饱满、详实。请确保扩写后的内容与上下文无缝衔接。",
   "paper_section_instruction_polish": "\n当前【{target_name}】部分的内容如下：\n{current_content}\n\n请根据以上所有信息，用{language}对【{target_name}】部分进行润色。要求：优化语言表达，修正语法错误，调整句子结构，使其学术性、专业性和可读性更强。",
   "paper_section_output_format": "\n你的回答应仅包含所要求部分的文本内容，不要添加任何额外的标题、标签或解释性文字。"
