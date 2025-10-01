@@ -67,6 +67,7 @@ def generate_text_from_prompt(content_list: list, model_name: str, temperature: 
     )
 
     print(f"使用模型 '{model_name}' (temperature={temperature}) 生成文本...")
+    print(content_list)
     response = client.models.generate_content(
         model=model_name,
         contents=content_list,

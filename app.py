@@ -309,6 +309,7 @@ def generate_paper_section():
         display_target_name = target_section_config['name']
         action_map = {'generate': 'paper_section_instruction_generate',
                       'modify': 'paper_section_instruction_modify',
+                      'ai_annotate': 'paper_section_instruction_ai_annotate',
                       'modify_annotated': 'paper_section_instruction_modify_annotated',
                       'expand': 'paper_section_instruction_expand',
                       'polish': 'paper_section_instruction_polish'}
@@ -324,7 +325,7 @@ def generate_paper_section():
             instruction = prompt_template.format(target_name=display_target_name,
                                                  current_content=current_content,
                                                  language=language, user_prompt=user_prompt)
-        elif action_type == 'modify_annotated':
+        elif action_type in ['modify_annotated', 'ai_annotate']:
             instruction = prompt_template.format(target_name=display_target_name,
                                                  current_content=current_content,
                                                  language=language)

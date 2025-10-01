@@ -1,47 +1,51 @@
 /* static/css/style.css */
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&family=Source+Serif+4:wght@400;500;700&display=swap');
 
+/* :root 定义了整个应用的全局颜色、字体和尺寸变量，构建了一套统一的设计系统。*/
 :root {
-    /* -- Academic Design System -- */
-    --primary-color: #0B3954;      /* 深普鲁士蓝 */
-    --accent-color: #B8860B;       /* 赭石金 */
-    --bg-color: #F9F7F3;           /* 纸莎草白 */
-    --card-bg: #FFFFFF;           /* 象牙白 */
-    --text-color: #1A1A1A;         /* 近黑色 */
-    --text-muted: #666666;         /* 中性灰 */
-    --border-color: #EAEAEA;       /* 浅灰色 */
+    /* -- 学术风格设计系统 -- */
+    --primary-color: #0B3954;      /* 深普鲁士蓝：用于主要交互元素和标题 */
+    --accent-color: #B8860B;       /* 赭石金：用于需要强调的次要元素 */
+    --bg-color: #F9F7F3;           /* 纸莎草白：主背景色，提供柔和的阅读环境 */
+    --card-bg: #FFFFFF;           /* 象牙白：卡片和内容区域的背景色 */
+    --text-color: #1A1A1A;         /* 近黑色：主要文本颜色 */
+    --text-muted: #666666;         /* 中性灰：辅助性或次要文本颜色 */
+    --border-color: #EAEAEA;       /* 浅灰色：边框和分隔线颜色 */
     --hover-bg-color: #f5f5f5;
 
-    --success-color: #2A785A;      /* 暗森林绿 */
-    --error-color: #A43820;        /* 深砖红 */
+    /* -- 状态色 -- */
+    --success-color: #2A785A;      /* 暗森林绿：成功状态 */
+    --error-color: #A43820;        /* 深砖红：错误状态 */
     --danger-color: #A43820;
     --warning-color: var(--accent-color);
-    --processing-color: #0B3954;
-    --locked-color: #909DA9;
-    --empty-color: var(--accent-color);
+    --processing-color: #0B3954;   /* 处理中状态 */
+    --locked-color: #909DA9;       /* 锁定状态 */
+    --empty-color: var(--accent-color); /* 内容为空状态 */
 
-    --font-sans: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-serif: 'Source Serif 4', 'Noto Serif SC', serif;
-    --font-mono: 'SF Mono', 'Consolas', 'Liberation Mono', Menlo, Courier, monospace;
+    /* -- 字体栈 -- */
+    --font-sans: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 无衬线字体，用于UI元素 */
+    --font-serif: 'Source Serif 4', 'Noto Serif SC', serif; /* 衬线字体，用于长文本阅读 */
+    --font-mono: 'SF Mono', 'Consolas', 'Liberation Mono', Menlo, Courier, monospace; /* 等宽字体，用于代码和差异对比 */
 
+    /* -- 尺寸与动画 -- */
     --border-radius-sm: 4px;
     --border-radius-md: 8px;
     --border-radius-lg: 12px;
-
     --transition-speed: 0.3s;
     --transition-curve: cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* -- 全局重置与基础样式 -- */
 *,
 *::before,
 *::after {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box; /* 统一盒模型 */
 }
 
 html {
-    scroll-behavior: smooth;
+    scroll-behavior: smooth; /* 平滑滚动效果 */
 }
 
 body {
@@ -49,7 +53,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     display: flex;
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased; /* 字体抗锯齿，提升渲染质量 */
     -moz-osx-font-smoothing: grayscale;
 }
 
@@ -59,7 +63,7 @@ body {
     height: 100vh;
 }
 
-/* -- Sidebar Navigation -- */
+/* -- 侧边导航栏 (Sidebar) -- */
 .sidebar {
     width: 80px;
     background-color: var(--card-bg);
@@ -73,7 +77,7 @@ body {
 }
 
 .sidebar:hover {
-    width: 260px;
+    width: 260px; /* 鼠标悬停时展开 */
 }
 
 .sidebar-header {
@@ -97,12 +101,12 @@ body {
     font-size: 1.5rem;
     font-weight: 500;
     margin-left: 0.75rem;
-    opacity: 0;
+    opacity: 0; /* 默认隐藏标题 */
     transition: opacity 0.2s ease;
 }
 
 .sidebar:hover .sidebar-title {
-    opacity: 1;
+    opacity: 1; /* 展开时显示标题 */
     transition-delay: 0.1s;
 }
 
@@ -125,7 +129,7 @@ body {
 }
 
 .sidebar ul li a:hover {
-    background-color: rgba(11, 57, 84, 0.05); /* Primary color at 5% opacity */
+    background-color: rgba(11, 57, 84, 0.05); /* 主色调的5%透明度作为悬停背景 */
     color: var(--primary-color);
 }
 
@@ -148,13 +152,13 @@ body {
     transition-delay: 0.1s;
 }
 
-/* -- Main Content Area -- */
+/* -- 主内容区域 (Main Content) -- */
 .main-content {
     flex-grow: 1;
     background-color: var(--bg-color);
     padding: 3rem;
     overflow-y: auto;
-    padding-bottom: 120px;
+    padding-bottom: 120px; /* 为底部的修改栏留出空间 */
 }
 
 .page-header {
@@ -178,6 +182,7 @@ body {
     margin: 0 auto;
 }
 
+/* -- 卡片式布局 -- */
 .content-card, .controls-card {
     background-color: var(--card-bg);
     border-radius: var(--border-radius-md);
@@ -195,7 +200,7 @@ h2, h3 {
     border-bottom: 1px solid var(--border-color);
 }
 
-/* -- Forms & Controls -- */
+/* -- 表单与控件 -- */
 .controls-card .control-group {
     margin-bottom: 1.75rem;
 }
@@ -251,7 +256,8 @@ input[type="range"]::-moz-range-thumb {
 .status-message.success { color: var(--success-color); }
 .status-message.error { color: var(--error-color); }
 
-.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-expand, .btn-polish, .btn-edit, .btn-modify, .btn-modify-annotated {
+/* -- 按钮 (Buttons) -- */
+.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-expand, .btn-polish, .btn-edit, .btn-modify, .btn-ai-annotate, .btn-modify-annotated {
     padding: 0.75rem 1.5rem; border: none; border-radius: var(--border-radius-md);
     cursor: pointer; font-weight: 600; font-size: 0.95rem;
     transition: all 0.2s ease;
@@ -268,7 +274,7 @@ input[type="range"]::-moz-range-thumb {
 .btn-success { background-color: var(--success-color); color: #fff; }
 .btn-danger { background-color: var(--danger-color); color: #fff; }
 
-/* -- Lists, Logs & Generic Status Indicators -- */
+/* -- 列表、日志与状态指示器 -- */
 #paper-list-container ul, #analyzed-paper-list ul {
     list-style: none;
 }
@@ -302,7 +308,7 @@ input[type="range"]::-moz-range-thumb {
     border: 1px solid var(--border-color);
 }
 
-/* -- Markdown Content -- */
+/* -- Markdown 内容渲染样式 -- */
 .markdown-content {
     font-family: var(--font-serif);
     line-height: 1.8; font-size: 1rem;
@@ -326,7 +332,7 @@ input[type="range"]::-moz-range-thumb {
     color: var(--text-muted); margin: 1.5em 0; background-color: transparent;
 }
 
-/* -- Fixed Bottom Bars -- */
+/* -- 固定底部栏 (Fixed Bottom Bars) -- */
 .modification-bar {
     position: fixed; bottom: 0; left: 80px; right: 0;
     background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px);
@@ -335,12 +341,14 @@ input[type="range"]::-moz-range-thumb {
     display: flex; align-items: center; gap: 1rem; z-index: 1000;
     transition: left var(--transition-speed) var(--transition-curve);
 }
+/* 当侧边栏展开时，动态调整修改栏的左边距 */
 body:has(.sidebar:hover) .modification-bar {
     left: 260px;
 }
 
-/* --- Paper Writing Page Specific Styles --- */
+/* --- 论文写作页面专属样式 --- */
 
+/* -- 论文管理卡片 -- */
 #paper-management-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -385,7 +393,7 @@ body:has(.sidebar:hover) .modification-bar {
     border: none;
 }
 
-/* Document View */
+/* -- 论文文档视图 -- */
 .paper-document-view {
     max-width: 1100px;
     margin: 3rem auto;
@@ -420,7 +428,7 @@ h3.paper-section-title {
 .paper-section[data-status="locked"] .content-display { color: var(--locked-color); cursor: not-allowed; }
 .content-display.is-placeholder .empty-placeholder { font-style: italic; color: var(--text-muted); }
 
-/* Section Specific Typography */
+/* -- 章节特定排版 -- */
 #section-title .content-display:not(.is-placeholder), #section-title textarea {
     font-weight: 700; font-size: 2.2rem; line-height: 1.3; text-align: center;
 }
@@ -428,10 +436,10 @@ h3.paper-section-title {
     font-style: italic;
 }
 .paper-section .content-display p:not(:first-child) {
-    text-indent: 2em; /* Paragraph first-line indent */
+    text-indent: 2em; /* 段落首行缩进 */
 }
 
-/* Status Indicator */
+/* -- 状态指示器 -- */
 .paper-section .status-indicator {
     width: 28px; height: 28px; border-radius: 50%; display: flex;
     align-items: center; justify-content: center; transition: all 0.3s var(--transition-curve);
@@ -451,7 +459,7 @@ h3.paper-section-title {
 }
 .paper-section .status-indicator.completed i { color: white; font-size: 1em; }
 
-/* Dependency Info */
+/* -- 依赖信息 -- */
 .dependencies-info {
     font-size: 0.85rem; margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 8px;
 }
@@ -463,7 +471,7 @@ h3.paper-section-title {
 .dep-item.completed { color: #2A785A; background-color: #eaf6f1; }
 .dep-item.pending { color: #616a73; background-color: #e9ecef; }
 
-/* Section Controls & Buttons */
+/* -- 章节控制按钮 -- */
 .section-controls { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 .section-controls .btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
 
@@ -475,6 +483,8 @@ h3.paper-section-title {
 
 .btn-modify { background-color: #c47600; color: white; }
 .btn-modify:hover { background-color: #a56400; }
+.btn-ai-annotate { background-color: #9B3A7A; color: white; }
+.btn-ai-annotate:hover { background-color: #802E63; }
 .btn-modify-annotated { background-color: #007399; color: white; }
 .btn-modify-annotated:hover { background-color: #005f7d; }
 
@@ -495,7 +505,7 @@ h3.paper-section-title {
 #prompt-bar textarea { border-radius: var(--border-radius-md); border: 1px solid #ccc; padding: 0.75rem 1rem; }
 #prompt-bar textarea:focus { border: 1px solid var(--primary-color); }
 
-/* Modal Styles */
+/* -- 模态框 (Modal) 通用样式 -- */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(9, 30, 66, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
@@ -516,32 +526,49 @@ h3.paper-section-title {
 }
 .modal-header h2 { border: none; margin: 0; padding: 0; font-size: 1.5rem; }
 .close-btn { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted); line-height: 1; }
-.modal-body { overflow: hidden; flex-grow: 1; display: flex; gap: 1rem; }
-.diff-pane { flex: 1; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--border-radius-md); background-color: var(--card-bg); position: relative; }
-.pane-header {
-    position: sticky; top: 0; background: #f9f9f9; padding: 0.75rem 1rem; font-weight: bold; border-bottom: 1px solid var(--border-color); z-index: 10;
-}
-#diff-output { display: flex; width: 100%; font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; }
-#diff-output-old, #diff-output-new { flex: 1 1 50%; white-space: pre-wrap; word-break: break-word; }
-.diff-line { display: flex; width: 100%; min-height: 24px; padding: 2px 0; }
-.diff-line.context { background-color: transparent; }
-.diff-line.added { background-color: rgba(42, 120, 90, 0.1); }
-.diff-line.removed { background-color: rgba(164, 56, 32, 0.1); }
-.diff-line.empty { background-color: #f7f9fc; }
-.line-number {
-    flex-shrink: 0; user-select: none; width: 45px; padding-right: 10px; text-align: right;
-    color: var(--text-muted); background-color: #f7f9f9; border-right: 1px solid var(--border-color);
-}
-.line-content { padding-left: 15px; flex-grow: 1; }
-.diff-line ins, .diff-line del { text-decoration: none; border-radius: 3px; }
-.diff-line.added ins { background-color: rgba(42, 120, 90, 0.2); }
-.diff-line.removed del { background-color: rgba(164, 56, 32, 0.2); }
 .modal-footer {
     padding-top: 1.5rem; margin-top: 1.5rem; border-top: 1px solid var(--border-color);
     display: flex; justify-content: flex-end; gap: 1rem;
 }
 
-/* Annotation Styles */
+/* -- 差异对比模态框 (Diff Modal) 专属样式 -- */
+.modal-body { overflow: hidden; flex-grow: 1; display: flex; gap: 1rem; }
+.diff-pane { flex: 1; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--border-radius-md); background-color: #fdfdfd; position: relative; }
+.pane-header {
+    position: sticky; top: 0; background: #f9f9f9; padding: 0.75rem 1rem; font-weight: bold; border-bottom: 1px solid var(--border-color); z-index: 10;
+}
+.diff-line {
+    display: flex;
+    width: 100%;
+    min-height: 24px;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.diff-line.context { background-color: transparent; }
+.diff-line.added { background-color: rgba(42, 120, 90, 0.08); }
+.diff-line.removed { background-color: rgba(164, 56, 32, 0.08); }
+.diff-line.empty { background-color: #f7f9fc; }
+.line-number {
+    flex-shrink: 0; user-select: none; width: 45px; padding-right: 10px; text-align: right;
+    color: var(--text-muted); background-color: #f7f9f9; border-right: 1px solid var(--border-color);
+}
+.line-content {
+    padding: 2px 15px;
+    flex-grow: 1;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.diff-line ins, .diff-line del {
+    text-decoration: none;
+    border-radius: 3px;
+    padding: 1px 0;
+}
+.diff-line ins { background-color: rgba(42, 120, 90, 0.25); }
+.diff-line del { background-color: rgba(164, 56, 32, 0.25); }
+
+
+/* -- 批注 (Annotation) 相关样式 -- */
 .annotated-text {
     background-color: rgba(255, 236, 179, 0.6); border-bottom: 2px dotted #FFB74D;
     padding: 0 2px; margin: 0 1px; border-radius: 2px; cursor: pointer; transition: background-color 0.2s ease;
@@ -569,7 +596,7 @@ h3.paper-section-title {
 #save-annotation-btn { background-color: var(--primary-color); color: white; }
 #cancel-annotation-btn { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); }
 
-/* Floating Toolbar */
+/* -- 浮动工具栏 (Floating Toolbar) -- */
 #floating-editor-toolbar {
     position: fixed; z-index: 1050; display: none; opacity: 0;
     transform: scale(0.9);
@@ -590,7 +617,7 @@ h3.paper-section-title {
 }
 
 
-/* Print Styles */
+/* -- 打印样式 (Print Styles) -- */
 @media print {
     body, .container { display: block; background-color: #fff; }
     .sidebar, .page-header, .controls-card, .section-controls, #prompt-bar, .modal-overlay, #floating-editor-toolbar, .annotation-popover {

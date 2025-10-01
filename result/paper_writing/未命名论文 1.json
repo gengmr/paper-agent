@@ -1,31 +1,25 @@
 {
+    "idea": {
+        "content": "",
+        "status": "empty"
+    },
+    "title": {
+        "content": "",
+        "status": "locked"
+    },
     "abstract": {
         "content": "",
         "status": "locked"
     },
-    "background": {
+    "keywords": {
         "content": "",
         "status": "locked"
-    },
-    "conclusion": {
-        "content": "",
-        "status": "locked"
-    },
-    "discussion": {
-        "content": "",
-        "status": "locked"
-    },
-    "documentName": "未命名论文 1",
-    "id": "未命名论文 1",
-    "idea": {
-        "content": "这是",
-        "status": "empty"
     },
     "introduction": {
         "content": "",
         "status": "locked"
     },
-    "keywords": {
+    "background": {
         "content": "",
         "status": "locked"
     },
@@ -37,8 +31,14 @@
         "content": "",
         "status": "locked"
     },
-    "title": {
+    "discussion": {
         "content": "",
         "status": "locked"
-    }
+    },
+    "conclusion": {
+        "content": "",
+        "status": "locked"
+    },
+    "id": "未命名论文 1",
+    "documentName": "未命名论文 1"
 }
