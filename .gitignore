@@ -1,0 +1,8 @@
+# 忽略 macOS 操作系统生成的文件
+.DS_Store
+
+# 忽略 Python 解释器生成的缓存文件夹
+__pycache__/
+
+# 忽略 JetBrains IDE (PyCharm, IntelliJ) 的项目配置文件夹
+.idea/
