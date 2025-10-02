@@ -73,7 +73,7 @@ body {
     border-right: 1px solid var(--border-color);
     z-index: 1001;
     overflow-x: hidden;
-    transition: width var(--transition-speed) var(--transition-curve);
+    transition: width var(--transition-speed) var(--transition-curve), transform var(--transition-speed) var(--transition-curve);
 }
 
 .sidebar:hover {
@@ -159,11 +159,14 @@ body {
     padding: 3rem;
     overflow-y: auto;
     padding-bottom: 120px; /* 为底部的修改栏留出空间 */
+    transition: padding-left var(--transition-speed) var(--transition-curve);
+    position: relative;
 }
 
 .page-header {
     margin-bottom: 2.5rem;
     padding-bottom: 1.5rem;
+    transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease, height var(--transition-speed) ease, margin var(--transition-speed) ease, padding var(--transition-speed) ease;
 }
 
 .page-header h1 {
@@ -189,6 +192,7 @@ body {
     padding: 2.5rem;
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
+    transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease, height var(--transition-speed) ease, margin var(--transition-speed) ease, padding var(--transition-speed) ease;
 }
 
 h2, h3 {
@@ -388,8 +392,19 @@ body:has(.sidebar:hover) .modification-bar {
 #new-paper-btn:hover { background-color: #082b40; }
 #rename-paper-btn:hover { background-color: var(--hover-bg-color); color: var(--primary-color); }
 #delete-paper-btn:hover { background-color: var(--danger-color); color: #fff; border-color: var(--danger-color); }
+.export-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+.export-buttons .btn {
+    flex: 1;
+}
 #export-pdf-btn {
-    width: 100%; background-color: var(--success-color); color: white;
+    background-color: var(--success-color); color: white;
+    border: none;
+}
+#export-markdown-btn {
+    background-color: #333; color: white;
     border: none;
 }
 
@@ -616,11 +631,83 @@ h3.paper-section-title {
     box-shadow: 0 8px 24px rgba(184, 134, 11, 0.4);
 }
 
+/* -- 专注模式 (Focus Mode) -- */
+.btn-focus-mode {
+    position: fixed;
+    top: 1.5rem;
+    right: 2rem;
+    z-index: 1050;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    font-size: 1.25rem;
+}
+.btn-focus-mode:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+body.focus-mode .sidebar {
+    transform: translateX(-100%);
+    border-right: none;
+}
+body.focus-mode .main-content {
+    padding-left: 3rem;
+}
+body.focus-mode .page-header,
+body.focus-mode #paper-management-card {
+    opacity: 0;
+    transform: translateY(-20px);
+    height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+}
+body.focus-mode .modification-bar {
+    left: 0;
+}
+body.focus-mode .paper-document-view {
+    margin-top: 0;
+}
+
+/* -- 字数统计 (Word Count) -- */
+.word-count-display {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 2rem;
+    z-index: 1040; /* 低于专注模式按钮，高于其他内容 */
+    background-color: rgba(11, 57, 84, 0.85); /* 主色调 + 透明度 */
+    color: #FFFFFF;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px; /* 胶囊形状 */
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity var(--transition-speed) var(--transition-curve), transform var(--transition-speed) var(--transition-curve);
+    pointer-events: none; /* 避免遮挡下方内容 */
+}
+.word-count-display.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 
 /* -- 打印样式 (Print Styles) -- */
 @media print {
     body, .container { display: block; background-color: #fff; }
-    .sidebar, .page-header, .controls-card, .section-controls, #prompt-bar, .modal-overlay, #floating-editor-toolbar, .annotation-popover {
+    .sidebar, .page-header, .controls-card, .section-controls, #prompt-bar, .modal-overlay, #floating-editor-toolbar, .annotation-popover, .btn-focus-mode, .word-count-display {
         display: none !important;
     }
     .annotated-text { background-color: transparent; border-bottom: none; padding: 0; margin: 0; border-radius: 0; }

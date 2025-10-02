@@ -25,7 +25,11 @@ EXCLUDE_DIRS = {
 # The script will automatically exclude itself.
 EXCLUDE_FILES = {
     '.DS_Store',
-    '.gitignore'
+    '.gitignore',
+    'README.md',
+    'brainstorming.html',
+    'comprehensive_literature_analysis.html',
+    'single_literature_analysis.html'
 }
 
 # File extensions to exclude.

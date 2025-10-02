@@ -1,10 +1,12 @@
 # app.py
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 from pathlib import Path
 import traceback
+from urllib.parse import quote
 
 # 导入我们的服务模块和配置
 from services import file_service, llm_service
+from services.export_service import create_markdown_from_paper
 # 导入模型列表和新的论文结构配置
 from config import AVAILABLE_MODELS, PAPER_STRUCTURE, PAPER_STRUCTURE_MAP
 
@@ -344,6 +346,38 @@ def generate_paper_section():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/paper/export/markdown/<paper_name>', methods=['GET'])
+def export_paper_as_markdown(paper_name):
+    """
+    API: 将指定论文导出为格式化的 Markdown 文件。
+    此端点会触发浏览器下载文件。
+    """
+    try:
+        paper_content = file_service.get_paper_content(paper_name)
+        if paper_content is None:
+            return jsonify({"status": "error", "message": "论文未找到"}), 404
+
+        # 调用新的导出服务来生成 Markdown 文本
+        markdown_text = create_markdown_from_paper(paper_content, PAPER_STRUCTURE)
+
+        # 对包含非 ASCII 字符的文件名进行 URL 编码，以符合 RFC 5987 标准
+        encoded_filename = quote(f"{paper_name}.md")
+
+        # 创建一个 Flask Response 对象，设置正确的 MIME 类型和 Content-Disposition 头
+        # 这会告诉浏览器将响应内容作为文件下载，而不是直接显示
+        # filename* 参数用于处理非 ASCII 字符，确保中文名能正确显示
+        return Response(
+            markdown_text,
+            mimetype='text/markdown; charset=utf-8',
+            headers={
+                "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
+            }
+        )
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": f"导出失败: {e}"}), 500
 
 
 if __name__ == '__main__':

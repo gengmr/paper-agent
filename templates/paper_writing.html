@@ -1,6 +1,14 @@
 {% extends "layout.html" %}
 {% block title %}论文写作{% endblock %}
 {% block content %}
+<!-- 专注模式切换按钮，独立于其他控件，固定在右上角 -->
+<button id="toggle-focus-mode-btn" class="btn btn-focus-mode" title="专注模式">
+    <i class="ph ph-corners-out"></i>
+</button>
+
+<!-- 字数统计显示区域，将被CSS固定在右下角 -->
+<div id="word-count-display" class="word-count-display"></div>
+
 <div class="page-header">
     <h1>论文写作</h1>
     <p>在此页面中，您可以创建、管理并逐步完成多篇论文的撰写。</p>
@@ -27,7 +35,11 @@
             </div>
         </div>
         <div class="control-group">
-             <button id="export-pdf-btn" class="btn btn-success full-width"><i class="ph ph-file-pdf"></i> 导出为 PDF</button>
+             <label>导出:</label>
+             <div class="export-buttons">
+                <button id="export-pdf-btn" class="btn"><i class="ph ph-file-pdf"></i> 导出为 PDF</button>
+                <button id="export-markdown-btn" class="btn"><i class="ph ph-file-md"></i> 导出 Markdown</button>
+            </div>
         </div>
     </div>
 

@@ -629,6 +629,9 @@ function initPaperWritingPage() {
     const renameBtn = document.getElementById('rename-paper-btn');
     const deleteBtn = document.getElementById('delete-paper-btn');
     const exportPdfBtn = document.getElementById('export-pdf-btn');
+    const exportMarkdownBtn = document.getElementById('export-markdown-btn');
+    const toggleFocusModeBtn = document.getElementById('toggle-focus-mode-btn');
+    const wordCountDisplay = document.getElementById('word-count-display');
     const annotationModal = document.getElementById('annotation-modal');
     const annotationInput = document.getElementById('annotation-input');
     const saveAnnotationBtn = document.getElementById('save-annotation-btn');
@@ -647,6 +650,56 @@ function initPaperWritingPage() {
 
     /** 动态调整 textarea 的高度以适应其内容。 */
     function adjustTextareaHeight(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }
+
+    /**
+     * 计算给定文本的字数。
+     * 此函数能智能处理中英文混合内容：
+     * - 每个汉字计为一个字。
+     * - 连续的英文字母、数字或下划线组合计为一个词。
+     * - 在计算前会移除所有批注标记。
+     * @param {string} text - 需要计算字数的文本。
+     * @returns {number} - 计算出的总字数。
+     */
+    function calculateWordCount(text) {
+        if (!text) return 0;
+        // 步骤1: 清理文本，移除所有批注标记，只保留原始文本内容。
+        const cleanedText = text.replace(/{{([\s\S]+?)}}【修改意见：[\s\S]+?】/g, '$1');
+
+        // 步骤2: 匹配并统计所有中文字符。
+        const chineseChars = cleanedText.match(/[\u4e00-\u9fa5]/g) || [];
+
+        // 步骤3: 将中文字符替换为空格，然后匹配并统计所有类英文单词（字母、数字、下划线、连字符、撇号）。
+        const nonChineseText = cleanedText.replace(/[\u4e00-\u9fa5]/g, ' ');
+        const englishWords = nonChineseText.match(/[a-zA-Z0-9_'-]+/g) || [];
+
+        // 步骤4: 返回中文字符数和英文单词数的总和。
+        return chineseChars.length + englishWords.length;
+    }
+
+    /**
+     * 更新整个文档的总字数统计，并将其显示在UI上。
+     */
+    function updateTotalWordCount() {
+        // 如果没有加载任何论文数据，则隐藏字数统计显示。
+        if (!paperState || Object.keys(paperState).length === 0) {
+            wordCountDisplay.classList.remove('visible');
+            return;
+        }
+
+        let totalWords = 0;
+        // 遍历论文结构，累加每个章节的字数。
+        paperStructure.forEach(sectionConfig => {
+            const key = sectionConfig.key;
+            if (paperState[key] && paperState[key].content) {
+                totalWords += calculateWordCount(paperState[key].content);
+            }
+        });
+
+        // 格式化数字（例如 1234 -> 1,234）并更新UI。
+        wordCountDisplay.textContent = `总字数: ${totalWords.toLocaleString('en-US')}`;
+        wordCountDisplay.classList.add('visible');
+    }
+
 
     /** 根据当前的 `paperState` 渲染整个论文的UI。 */
     function renderPaperState() {
@@ -722,6 +775,7 @@ function initPaperWritingPage() {
             }
         });
         updateToolbarPosition();
+        updateTotalWordCount();
     }
 
     /** 根据 `paperStructure` 配置，在DOM中创建论文的骨架结构。 */
@@ -863,6 +917,8 @@ function initPaperWritingPage() {
             ideaContainer.style.display = 'none';
             renameInput.value = '';
             currentPaperId = null;
+            paperState = {}; // 清空状态
+            updateTotalWordCount(); // 隐藏字数统计
             return;
         }
         ideaContainer.style.display = 'block';
@@ -957,6 +1013,21 @@ function initPaperWritingPage() {
         currentAnnotationCallback = null;
     }
 
+    /** 切换专注模式 */
+    function toggleFocusMode() {
+        const body = document.body;
+        const isFocus = body.classList.toggle('focus-mode');
+        localStorage.setItem('focusMode', isFocus);
+        if (isFocus) {
+            toggleFocusModeBtn.innerHTML = '<i class="ph ph-corners-in"></i>';
+            toggleFocusModeBtn.title = "退出专注模式";
+        } else {
+            toggleFocusModeBtn.innerHTML = '<i class="ph ph-corners-out"></i>';
+            toggleFocusModeBtn.title = "专注模式";
+        }
+    }
+
+
     saveAnnotationBtn.addEventListener('click', () => {
         if (currentAnnotationCallback) {
             currentAnnotationCallback(annotationInput.value);
@@ -973,6 +1044,8 @@ function initPaperWritingPage() {
     renameBtn.addEventListener('click', async () => { const newName = renameInput.value.trim(); if (!newName || !currentPaperId || newName === currentPaperId) return; try { const response = await fetch(`/api/papers/rename/${currentPaperId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ newName }) }); const result = await response.json(); if (result.status === 'success') { localStorage.setItem('currentPaperId', newName); await loadPaperList(); } else { alert(`重命名失败: ${result.message}`); renameInput.value = currentPaperId; } } catch (error) { console.error('重命名失败:', error); } });
     deleteBtn.addEventListener('click', async () => { if (!currentPaperId) return; if (confirm(`确定要删除文章 "${paperState.documentName}" 吗？此操作无法撤销。`)) { try { await fetch(`/api/papers/delete/${currentPaperId}`, { method: 'DELETE' }); localStorage.removeItem('currentPaperId'); await loadPaperList(); } catch (error) { console.error('删除失败:', error); } } });
     exportPdfBtn.addEventListener('click', () => { if (!currentPaperId) { alert("请先选择一篇要导出的文章。"); return; } const originalTitle = document.title; const paperTitle = paperState.title?.content.trim() || paperState.documentName || '未命名论文'; const safeFileName = paperTitle.replace(/[\/\\?%*:|"<>]/g, '-').replace(/\s+/g, ' ').trim(); document.title = safeFileName; window.print(); setTimeout(() => { document.title = originalTitle; }, 1000); });
+    exportMarkdownBtn.addEventListener('click', () => { if (!currentPaperId) { alert("请先选择一篇要导出的文章。"); return; } window.location.href = `/api/paper/export/markdown/${currentPaperId}`; });
+    toggleFocusModeBtn.addEventListener('click', toggleFocusMode);
 
     /**
      * 中心化的交互事件处理器。
@@ -1061,12 +1134,13 @@ function initPaperWritingPage() {
             return;
         }
 
-        // 处理 textarea 的输入事件，用于自动保存
+        // 处理 textarea 的输入事件，用于自动保存和更新字数统计
         if (e.type === 'input' && target.matches('textarea[data-section]')) {
             const sectionKey = target.dataset.section;
             paperState[sectionKey].content = target.value;
             adjustTextareaHeight(target);
             scheduleSave();
+            updateTotalWordCount();
         }
     }
 
@@ -1147,6 +1221,17 @@ function initPaperWritingPage() {
             createInitialStructure();
             createFloatingToolbar();
             await loadPaperList();
+
+            // 检查并应用专注模式
+            if (localStorage.getItem('focusMode') === 'true') {
+                document.body.classList.add('focus-mode');
+                toggleFocusModeBtn.innerHTML = '<i class="ph ph-corners-in"></i>';
+                toggleFocusModeBtn.title = "退出专注模式";
+            } else {
+                toggleFocusModeBtn.innerHTML = '<i class="ph ph-corners-out"></i>';
+                toggleFocusModeBtn.title = "专注模式";
+            }
+
             mainContent.addEventListener('scroll', updateToolbarPosition);
             window.addEventListener('resize', updateToolbarPosition);
         } catch (error) {
